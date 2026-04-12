@@ -49,14 +49,7 @@ async function main() {
     lastTurnExecMs: session.lastTurnExecMs
   });
 
-  process.stdout.write(
-    JSON.stringify({
-      hookSpecificOutput: {
-        hookEventName: 'UserPromptSubmit',
-        additionalContext
-      }
-    })
-  );
+  process.stdout.write(additionalContext);
 }
 
 main().catch((error) => {

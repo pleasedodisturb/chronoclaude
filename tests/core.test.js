@@ -49,8 +49,8 @@ test('formatTimingBlock includes only available numeric fields', () => {
     [
       '[message_timing]',
       'user_message_utc: 2026-04-12T18:34:56.789Z',
-      'idle_since_last_stop_ms: 14890',
-      'last_turn_exec_ms: 4321',
+      'idle_since_last_stop_seconds: 14.9',
+      'last_turn_exec_seconds: 4.3',
       '[/message_timing]'
     ].join('\n')
   );
@@ -69,7 +69,7 @@ test('formatTimingBlock omits non-finite numeric fields', () => {
     [
       '[message_timing]',
       'user_message_utc: 2026-04-12T18:34:56.789Z',
-      'last_turn_exec_ms: 4321',
+      'last_turn_exec_seconds: 4.3',
       '[/message_timing]'
     ].join('\n')
   );

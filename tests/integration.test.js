@@ -111,20 +111,16 @@ test('prompt, stop, then prompt includes idle and prior execution timing context
 
   assert.equal(secondPrompt.code, 0, `expected success, stderr was: ${secondPrompt.stderr}`);
   assert.equal(secondPrompt.stderr, '');
-
-  assert.deepEqual(JSON.parse(secondPrompt.stdout), {
-    hookSpecificOutput: {
-      hookEventName: 'UserPromptSubmit',
-      additionalContext: [
-        '[message_timing]',
-        'user_message_utc: 2026-04-12T19:00:19.211Z',
-        'idle_since_last_assistant_ms: 14890',
-        'idle_since_last_stop_ms: 14890',
-        'last_turn_exec_ms: 4321',
-        '[/message_timing]'
-      ].join('\n')
-    }
-  });
+  assert.equal(
+    secondPrompt.stdout,
+    [
+      '[message_timing]',
+      'user_message_utc: 2026-04-12T19:00:19.211Z',
+      'idle_since_last_stop_seconds: 14.9',
+      'last_turn_exec_seconds: 4.3',
+      '[/message_timing]'
+    ].join('\n')
+  );
 });
 
 test('prompt, stop, prompt, stop, then prompt reports the second turn execution duration', async () => {
@@ -175,18 +171,14 @@ test('prompt, stop, prompt, stop, then prompt reports the second turn execution 
 
   assert.equal(thirdPrompt.code, 0, `expected success, stderr was: ${thirdPrompt.stderr}`);
   assert.equal(thirdPrompt.stderr, '');
-
-  assert.deepEqual(JSON.parse(thirdPrompt.stdout), {
-    hookSpecificOutput: {
-      hookEventName: 'UserPromptSubmit',
-      additionalContext: [
-        '[message_timing]',
-        'user_message_utc: 2026-04-12T19:01:00.000Z',
-        'idle_since_last_assistant_ms: 32346',
-        'idle_since_last_stop_ms: 32346',
-        'last_turn_exec_ms: 8443',
-        '[/message_timing]'
-      ].join('\n')
-    }
-  });
+  assert.equal(
+    thirdPrompt.stdout,
+    [
+      '[message_timing]',
+      'user_message_utc: 2026-04-12T19:01:00.000Z',
+      'idle_since_last_stop_seconds: 32.3',
+      'last_turn_exec_seconds: 8.4',
+      '[/message_timing]'
+    ].join('\n')
+  );
 });

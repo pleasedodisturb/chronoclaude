@@ -52,17 +52,10 @@ test('first prompt injects only the UTC timestamp block and persists lastUserPro
 
   assert.equal(result.code, 0, `expected success, stderr was: ${result.stderr}`);
   assert.equal(result.stderr, '');
-
-  assert.deepEqual(JSON.parse(result.stdout), {
-    hookSpecificOutput: {
-      hookEventName: 'UserPromptSubmit',
-      additionalContext: [
-        '[message_timing]',
-        `user_message_utc: ${nowIso}`,
-        '[/message_timing]'
-      ].join('\n')
-    }
-  });
+  assert.equal(
+    result.stdout,
+    ['[message_timing]', `user_message_utc: ${nowIso}`, '[/message_timing]'].join('\n')
+  );
 
   const statePath = path.join(dataDir, 'sessions', 'session-1.json');
   assert.deepEqual(JSON.parse(fs.readFileSync(statePath, 'utf8')), {
@@ -100,20 +93,16 @@ test('later prompts include idle and previous execution timings from state', asy
 
   assert.equal(result.code, 0, `expected success, stderr was: ${result.stderr}`);
   assert.equal(result.stderr, '');
-
-  assert.deepEqual(JSON.parse(result.stdout), {
-    hookSpecificOutput: {
-      hookEventName: 'UserPromptSubmit',
-      additionalContext: [
-        '[message_timing]',
-        `user_message_utc: ${nowIso}`,
-        'idle_since_last_assistant_ms: 7000',
-        'idle_since_last_stop_ms: 5500',
-        'last_turn_exec_ms: 4321',
-        '[/message_timing]'
-      ].join('\n')
-    }
-  });
+  assert.equal(
+    result.stdout,
+    [
+      '[message_timing]',
+      `user_message_utc: ${nowIso}`,
+      'idle_since_last_stop_seconds: 5.5',
+      'last_turn_exec_seconds: 4.3',
+      '[/message_timing]'
+    ].join('\n')
+  );
 
   const statePath = path.join(dataDir, 'sessions', 'session-1.json');
   assert.deepEqual(JSON.parse(fs.readFileSync(statePath, 'utf8')), {

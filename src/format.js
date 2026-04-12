@@ -1,20 +1,18 @@
-function appendNumberLine(lines, name, value) {
+function appendDurationLine(lines, name, value) {
   if (typeof value === 'number' && Number.isFinite(value)) {
-    lines.push(`${name}: ${value}`);
+    lines.push(`${name}: ${(value / 1000).toFixed(1)}`);
   }
 }
 
 function formatTimingBlock({
   userMessageUtc,
-  idleSinceLastAssistantMs,
   idleSinceLastStopMs,
   lastTurnExecMs
 }) {
   const lines = ['[message_timing]', `user_message_utc: ${userMessageUtc}`];
 
-  appendNumberLine(lines, 'idle_since_last_assistant_ms', idleSinceLastAssistantMs);
-  appendNumberLine(lines, 'idle_since_last_stop_ms', idleSinceLastStopMs);
-  appendNumberLine(lines, 'last_turn_exec_ms', lastTurnExecMs);
+  appendDurationLine(lines, 'idle_since_last_stop_seconds', idleSinceLastStopMs);
+  appendDurationLine(lines, 'last_turn_exec_seconds', lastTurnExecMs);
 
   lines.push('[/message_timing]');
   return lines.join('\n');
