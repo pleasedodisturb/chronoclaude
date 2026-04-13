@@ -5,15 +5,15 @@ Claude Code plugin that injects hidden timing context alongside each user messag
 The plugin adds:
 
 - `user_message_utc`
-- `idle_since_last_assistant_ms`
-- `idle_since_last_stop_ms`
-- `last_turn_exec_ms`
+- `idle_since_last_stop_seconds`
+- `last_turn_exec_seconds`
 
 ## What It Does
 
 The plugin uses official Claude Code hooks:
 
 - `UserPromptSubmit` injects hidden timing context on every prompt
+- `UserPromptSubmit` also shows a compact TUI note like `[after 5m 2s]` when the user replies after more than one idle minute
 - `Stop` persists per-session timing state for the next turn
 
 On a fresh session, unavailable prior-turn fields are omitted.
@@ -49,5 +49,5 @@ claude plugin validate .
 ## Notes
 
 - The timing block is added as hidden hook context, not visible prompt text.
-- In v1, `lastAssistantMessageAt` is approximated using the `Stop` hook timestamp.
-- That means `idle_since_last_assistant_ms` is effectively very close to `idle_since_last_stop_ms` in the current implementation.
+- The over-one-minute idle note is emitted as a hook `systemMessage` so it is visible to the user without being added to the plugin's `additionalContext`.
+- In v1, idle time is measured from the previous `Stop` hook timestamp.

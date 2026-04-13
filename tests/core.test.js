@@ -5,7 +5,7 @@ const os = require('node:os');
 const path = require('node:path');
 
 const { toIsoUtc, getNowIso, diffMs } = require('../src/time');
-const { formatTimingBlock } = require('../src/format');
+const { formatIdleSystemMessage, formatTimingBlock } = require('../src/format');
 const { getSessionFilePath, loadSessionState, saveSessionState } = require('../src/state');
 
 test('toIsoUtc normalizes a date-like value to UTC ISO 8601', () => {
@@ -73,6 +73,18 @@ test('formatTimingBlock omits non-finite numeric fields', () => {
       '[/message_timing]'
     ].join('\n')
   );
+});
+
+test('formatIdleSystemMessage returns a minimal bracketed note after one minute', () => {
+  assert.equal(formatIdleSystemMessage(63000), '[after 1m 3s]');
+  assert.equal(formatIdleSystemMessage(302000), '[after 5m 2s]');
+});
+
+test('formatIdleSystemMessage omits short or unavailable idle gaps', () => {
+  assert.equal(formatIdleSystemMessage(60000), null);
+  assert.equal(formatIdleSystemMessage(59999), null);
+  assert.equal(formatIdleSystemMessage(null), null);
+  assert.equal(formatIdleSystemMessage(Number.NaN), null);
 });
 
 test('loadSessionState returns a default object when the session is new', async () => {

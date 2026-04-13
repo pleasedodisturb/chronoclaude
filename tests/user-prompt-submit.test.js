@@ -8,6 +8,10 @@ const { spawn } = require('node:child_process');
 const rootDir = path.resolve(__dirname, '..');
 const scriptPath = path.join(rootDir, 'scripts', 'user-prompt-submit.js');
 
+function parseHookOutput(stdout) {
+  return JSON.parse(stdout);
+}
+
 function runUserPromptSubmit({ input, dataDir, nowIso }) {
   return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, [scriptPath], {
@@ -52,10 +56,12 @@ test('first prompt injects only the UTC timestamp block and persists lastUserPro
 
   assert.equal(result.code, 0, `expected success, stderr was: ${result.stderr}`);
   assert.equal(result.stderr, '');
-  assert.equal(
-    result.stdout,
-    ['[message_timing]', `user_message_utc: ${nowIso}`, '[/message_timing]'].join('\n')
-  );
+  assert.deepEqual(parseHookOutput(result.stdout), {
+    hookSpecificOutput: {
+      hookEventName: 'UserPromptSubmit',
+      additionalContext: ['[message_timing]', `user_message_utc: ${nowIso}`, '[/message_timing]'].join('\n')
+    }
+  });
 
   const statePath = path.join(dataDir, 'sessions', 'session-1.json');
   assert.deepEqual(JSON.parse(fs.readFileSync(statePath, 'utf8')), {
@@ -93,16 +99,18 @@ test('later prompts include idle and previous execution timings from state', asy
 
   assert.equal(result.code, 0, `expected success, stderr was: ${result.stderr}`);
   assert.equal(result.stderr, '');
-  assert.equal(
-    result.stdout,
-    [
-      '[message_timing]',
-      `user_message_utc: ${nowIso}`,
-      'idle_since_last_stop_seconds: 5.5',
-      'last_turn_exec_seconds: 4.3',
-      '[/message_timing]'
-    ].join('\n')
-  );
+  assert.deepEqual(parseHookOutput(result.stdout), {
+    hookSpecificOutput: {
+      hookEventName: 'UserPromptSubmit',
+      additionalContext: [
+        '[message_timing]',
+        `user_message_utc: ${nowIso}`,
+        'idle_since_last_stop_seconds: 5.5',
+        'last_turn_exec_seconds: 4.3',
+        '[/message_timing]'
+      ].join('\n')
+    }
+  });
 
   const statePath = path.join(dataDir, 'sessions', 'session-1.json');
   assert.deepEqual(JSON.parse(fs.readFileSync(statePath, 'utf8')), {
@@ -111,6 +119,48 @@ test('later prompts include idle and previous execution timings from state', asy
     lastStopAt: null,
     lastTurnExecMs: 4321,
     lastUserPromptAt: nowIso
+  });
+});
+
+test('idle gaps over one minute are shown to the user without adding the note to additionalContext', async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-user-prompt-'));
+  const nowIso = '2026-04-12T19:05:06.000Z';
+
+  fs.mkdirSync(path.join(dataDir, 'sessions'), { recursive: true });
+  fs.writeFileSync(
+    path.join(dataDir, 'sessions', 'session-1.json'),
+    JSON.stringify(
+      {
+        sessionId: 'session-1',
+        lastStopAt: '2026-04-12T19:00:04.000Z',
+        lastTurnExecMs: 4321,
+        lastUserPromptAt: '2026-04-12T18:59:00.000Z'
+      },
+      null,
+      2
+    )
+  );
+
+  const result = await runUserPromptSubmit({
+    input: { session_id: 'session-1' },
+    dataDir,
+    nowIso
+  });
+
+  assert.equal(result.code, 0, `expected success, stderr was: ${result.stderr}`);
+  assert.equal(result.stderr, '');
+  assert.deepEqual(parseHookOutput(result.stdout), {
+    systemMessage: '[after 5m 2s]',
+    hookSpecificOutput: {
+      hookEventName: 'UserPromptSubmit',
+      additionalContext: [
+        '[message_timing]',
+        `user_message_utc: ${nowIso}`,
+        'idle_since_last_stop_seconds: 302.0',
+        'last_turn_exec_seconds: 4.3',
+        '[/message_timing]'
+      ].join('\n')
+    }
   });
 });
 

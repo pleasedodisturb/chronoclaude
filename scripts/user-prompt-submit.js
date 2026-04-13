@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { formatTimingBlock } = require('../src/format');
+const { formatIdleSystemMessage, formatTimingBlock } = require('../src/format');
 const { loadSessionState, saveSessionState } = require('../src/state');
 const { getNowIso, diffMs } = require('../src/time');
 
@@ -42,14 +42,26 @@ async function main() {
     }
   });
 
+  const idleSinceLastStopMs = diffMs(userMessageUtc, session.lastStopAt);
   const additionalContext = formatTimingBlock({
     userMessageUtc,
     idleSinceLastAssistantMs: diffMs(userMessageUtc, session.lastAssistantMessageAt),
-    idleSinceLastStopMs: diffMs(userMessageUtc, session.lastStopAt),
+    idleSinceLastStopMs,
     lastTurnExecMs: session.lastTurnExecMs
   });
+  const hookOutput = {
+    hookSpecificOutput: {
+      hookEventName: 'UserPromptSubmit',
+      additionalContext
+    }
+  };
+  const systemMessage = formatIdleSystemMessage(idleSinceLastStopMs);
 
-  process.stdout.write(additionalContext);
+  if (systemMessage) {
+    hookOutput.systemMessage = systemMessage;
+  }
+
+  process.stdout.write(JSON.stringify(hookOutput));
 }
 
 main().catch((error) => {

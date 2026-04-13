@@ -81,6 +81,10 @@ function runStop(options) {
   return runScript(stopScriptPath, options);
 }
 
+function parseHookOutput(stdout) {
+  return JSON.parse(stdout);
+}
+
 test('prompt, stop, then prompt includes idle and prior execution timing context', async () => {
   const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-integration-'));
   const sessionId = 'session-1';
@@ -111,16 +115,18 @@ test('prompt, stop, then prompt includes idle and prior execution timing context
 
   assert.equal(secondPrompt.code, 0, `expected success, stderr was: ${secondPrompt.stderr}`);
   assert.equal(secondPrompt.stderr, '');
-  assert.equal(
-    secondPrompt.stdout,
-    [
-      '[message_timing]',
-      'user_message_utc: 2026-04-12T19:00:19.211Z',
-      'idle_since_last_stop_seconds: 14.9',
-      'last_turn_exec_seconds: 4.3',
-      '[/message_timing]'
-    ].join('\n')
-  );
+  assert.deepEqual(parseHookOutput(secondPrompt.stdout), {
+    hookSpecificOutput: {
+      hookEventName: 'UserPromptSubmit',
+      additionalContext: [
+        '[message_timing]',
+        'user_message_utc: 2026-04-12T19:00:19.211Z',
+        'idle_since_last_stop_seconds: 14.9',
+        'last_turn_exec_seconds: 4.3',
+        '[/message_timing]'
+      ].join('\n')
+    }
+  });
 });
 
 test('prompt, stop, prompt, stop, then prompt reports the second turn execution duration', async () => {
@@ -171,14 +177,61 @@ test('prompt, stop, prompt, stop, then prompt reports the second turn execution 
 
   assert.equal(thirdPrompt.code, 0, `expected success, stderr was: ${thirdPrompt.stderr}`);
   assert.equal(thirdPrompt.stderr, '');
-  assert.equal(
-    thirdPrompt.stdout,
-    [
-      '[message_timing]',
-      'user_message_utc: 2026-04-12T19:01:00.000Z',
-      'idle_since_last_stop_seconds: 32.3',
-      'last_turn_exec_seconds: 8.4',
-      '[/message_timing]'
-    ].join('\n')
-  );
+  assert.deepEqual(parseHookOutput(thirdPrompt.stdout), {
+    hookSpecificOutput: {
+      hookEventName: 'UserPromptSubmit',
+      additionalContext: [
+        '[message_timing]',
+        'user_message_utc: 2026-04-12T19:01:00.000Z',
+        'idle_since_last_stop_seconds: 32.3',
+        'last_turn_exec_seconds: 8.4',
+        '[/message_timing]'
+      ].join('\n')
+    }
+  });
+});
+
+test('prompt after more than one idle minute includes a visible TUI system message', async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-integration-'));
+  const sessionId = 'session-1';
+
+  const firstPrompt = await runUserPromptSubmit({
+    input: { session_id: sessionId },
+    dataDir,
+    nowIso: '2026-04-12T19:00:00.000Z'
+  });
+
+  assert.equal(firstPrompt.code, 0, `expected success, stderr was: ${firstPrompt.stderr}`);
+  assert.equal(firstPrompt.stderr, '');
+
+  const stopResult = await runStop({
+    input: { session_id: sessionId },
+    dataDir,
+    nowIso: '2026-04-12T19:00:04.321Z'
+  });
+
+  assert.equal(stopResult.code, 0, `expected success, stderr was: ${stopResult.stderr}`);
+  assert.equal(stopResult.stderr, '');
+
+  const secondPrompt = await runUserPromptSubmit({
+    input: { session_id: sessionId },
+    dataDir,
+    nowIso: '2026-04-12T19:05:06.321Z'
+  });
+
+  assert.equal(secondPrompt.code, 0, `expected success, stderr was: ${secondPrompt.stderr}`);
+  assert.equal(secondPrompt.stderr, '');
+  assert.deepEqual(parseHookOutput(secondPrompt.stdout), {
+    systemMessage: '[after 5m 2s]',
+    hookSpecificOutput: {
+      hookEventName: 'UserPromptSubmit',
+      additionalContext: [
+        '[message_timing]',
+        'user_message_utc: 2026-04-12T19:05:06.321Z',
+        'idle_since_last_stop_seconds: 302.0',
+        'last_turn_exec_seconds: 4.3',
+        '[/message_timing]'
+      ].join('\n')
+    }
+  });
 });
