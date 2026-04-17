@@ -1,22 +1,22 @@
+const { stripMs } = require('./time');
+
 const IDLE_SYSTEM_MESSAGE_THRESHOLD_MS = 60 * 1000;
 
-function appendDurationLine(lines, name, value) {
-  if (typeof value === 'number' && Number.isFinite(value)) {
-    lines.push(`${name}: ${(value / 1000).toFixed(1)}`);
+function appendDuration(parts, name, valueMs) {
+  if (typeof valueMs === 'number' && Number.isFinite(valueMs)) {
+    parts.push(`${name}=${(valueMs / 1000).toFixed(1)}s`);
   }
 }
 
 function formatTimingBlock({
-  userMessageUtc,
+  userMessageTime,
   idleSinceLastStopMs,
   lastTurnExecMs
 }) {
-  const lines = ['[message_timing]', `user_message_utc: ${userMessageUtc}`];
-
-  appendDurationLine(lines, 'idle_since_last_stop_seconds', idleSinceLastStopMs);
-  appendDurationLine(lines, 'last_turn_exec_seconds', lastTurnExecMs);
-
-  lines.push('[/message_timing]');
+  const lines = ['[timing]', `time=${stripMs(userMessageTime)}`];
+  appendDuration(lines, 'idle_for', idleSinceLastStopMs);
+  appendDuration(lines, 'last_turn', lastTurnExecMs);
+  lines.push('[/timing]');
   return lines.join('\n');
 }
 

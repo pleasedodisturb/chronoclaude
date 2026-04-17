@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 
-const { toIsoUtc, getNowIso, diffMs } = require('../src/time');
+const { toIsoUtc, toLocalIso, getNowIso, stripMs, diffMs } = require('../src/time');
 const { formatIdleSystemMessage, formatTimingBlock } = require('../src/format');
 const { getSessionFilePath, loadSessionState, saveSessionState } = require('../src/state');
 
@@ -38,7 +38,7 @@ test('diffMs returns null for malformed timestamps', () => {
 
 test('formatTimingBlock includes only available numeric fields', () => {
   const block = formatTimingBlock({
-    userMessageUtc: '2026-04-12T18:34:56.789Z',
+    userMessageTime: '2026-04-13T04:34:56.789+10:00',
     idleSinceLastAssistantMs: null,
     idleSinceLastStopMs: 14890,
     lastTurnExecMs: 4321
@@ -47,18 +47,18 @@ test('formatTimingBlock includes only available numeric fields', () => {
   assert.equal(
     block,
     [
-      '[message_timing]',
-      'user_message_utc: 2026-04-12T18:34:56.789Z',
-      'idle_since_last_stop_seconds: 14.9',
-      'last_turn_exec_seconds: 4.3',
-      '[/message_timing]'
+      '[timing]',
+      'time=2026-04-13T04:34:56+10:00',
+      'idle_for=14.9s',
+      'last_turn=4.3s',
+      '[/timing]'
     ].join('\n')
   );
 });
 
 test('formatTimingBlock omits non-finite numeric fields', () => {
   const block = formatTimingBlock({
-    userMessageUtc: '2026-04-12T18:34:56.789Z',
+    userMessageTime: '2026-04-13T04:34:56.789+10:00',
     idleSinceLastAssistantMs: Number.NaN,
     idleSinceLastStopMs: Number.POSITIVE_INFINITY,
     lastTurnExecMs: 4321
@@ -67,12 +67,35 @@ test('formatTimingBlock omits non-finite numeric fields', () => {
   assert.equal(
     block,
     [
-      '[message_timing]',
-      'user_message_utc: 2026-04-12T18:34:56.789Z',
-      'last_turn_exec_seconds: 4.3',
-      '[/message_timing]'
+      '[timing]',
+      'time=2026-04-13T04:34:56+10:00',
+      'last_turn=4.3s',
+      '[/timing]'
     ].join('\n')
   );
+});
+
+test('stripMs drops fractional seconds while preserving Z or offset suffix', () => {
+  assert.equal(stripMs('2026-04-13T04:34:56.789+10:00'), '2026-04-13T04:34:56+10:00');
+  assert.equal(stripMs('2026-04-13T04:34:56.789Z'), '2026-04-13T04:34:56Z');
+  assert.equal(stripMs('2026-04-13T04:34:56+10:00'), '2026-04-13T04:34:56+10:00');
+});
+
+test('toLocalIso emits explicit offset and millisecond precision', () => {
+  const fakeDate = {
+    getFullYear: () => 2026,
+    getMonth: () => 3,
+    getDate: () => 13,
+    getHours: () => 4,
+    getMinutes: () => 34,
+    getSeconds: () => 56,
+    getMilliseconds: () => 789,
+    getTimezoneOffset: () => -600
+  };
+  assert.equal(toLocalIso(fakeDate), '2026-04-13T04:34:56.789+10:00');
+
+  const negativeOffset = { ...fakeDate, getTimezoneOffset: () => 300 };
+  assert.equal(toLocalIso(negativeOffset), '2026-04-13T04:34:56.789-05:00');
 });
 
 test('formatIdleSystemMessage returns a minimal bracketed note after one minute', () => {

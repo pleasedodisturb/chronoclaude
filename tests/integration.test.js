@@ -92,7 +92,7 @@ test('prompt, stop, then prompt includes idle and prior execution timing context
   const firstPrompt = await runUserPromptSubmit({
     input: { session_id: sessionId },
     dataDir,
-    nowIso: '2026-04-12T19:00:00.000Z'
+    nowIso: '2026-04-13T05:00:00.000+10:00'
   });
 
   assert.equal(firstPrompt.code, 0, `expected success, stderr was: ${firstPrompt.stderr}`);
@@ -101,7 +101,7 @@ test('prompt, stop, then prompt includes idle and prior execution timing context
   const stopResult = await runStop({
     input: { session_id: sessionId },
     dataDir,
-    nowIso: '2026-04-12T19:00:04.321Z'
+    nowIso: '2026-04-13T05:00:04.321+10:00'
   });
 
   assert.equal(stopResult.code, 0, `expected success, stderr was: ${stopResult.stderr}`);
@@ -110,7 +110,7 @@ test('prompt, stop, then prompt includes idle and prior execution timing context
   const secondPrompt = await runUserPromptSubmit({
     input: { session_id: sessionId },
     dataDir,
-    nowIso: '2026-04-12T19:00:19.211Z'
+    nowIso: '2026-04-13T05:00:19.211+10:00'
   });
 
   assert.equal(secondPrompt.code, 0, `expected success, stderr was: ${secondPrompt.stderr}`);
@@ -119,11 +119,11 @@ test('prompt, stop, then prompt includes idle and prior execution timing context
     hookSpecificOutput: {
       hookEventName: 'UserPromptSubmit',
       additionalContext: [
-        '[message_timing]',
-        'user_message_utc: 2026-04-12T19:00:19.211Z',
-        'idle_since_last_stop_seconds: 14.9',
-        'last_turn_exec_seconds: 4.3',
-        '[/message_timing]'
+        '[timing]',
+        'time=2026-04-13T05:00:19+10:00',
+        'idle_for=14.9s',
+        'last_turn=4.3s',
+        '[/timing]'
       ].join('\n')
     }
   });
@@ -136,7 +136,7 @@ test('prompt, stop, prompt, stop, then prompt reports the second turn execution 
   const firstPrompt = await runUserPromptSubmit({
     input: { session_id: sessionId },
     dataDir,
-    nowIso: '2026-04-12T19:00:00.000Z'
+    nowIso: '2026-04-13T05:00:00.000+10:00'
   });
 
   assert.equal(firstPrompt.code, 0, `expected success, stderr was: ${firstPrompt.stderr}`);
@@ -145,7 +145,7 @@ test('prompt, stop, prompt, stop, then prompt reports the second turn execution 
   const firstStop = await runStop({
     input: { session_id: sessionId },
     dataDir,
-    nowIso: '2026-04-12T19:00:04.321Z'
+    nowIso: '2026-04-13T05:00:04.321+10:00'
   });
 
   assert.equal(firstStop.code, 0, `expected success, stderr was: ${firstStop.stderr}`);
@@ -154,7 +154,7 @@ test('prompt, stop, prompt, stop, then prompt reports the second turn execution 
   const secondPrompt = await runUserPromptSubmit({
     input: { session_id: sessionId },
     dataDir,
-    nowIso: '2026-04-12T19:00:19.211Z'
+    nowIso: '2026-04-13T05:00:19.211+10:00'
   });
 
   assert.equal(secondPrompt.code, 0, `expected success, stderr was: ${secondPrompt.stderr}`);
@@ -163,7 +163,7 @@ test('prompt, stop, prompt, stop, then prompt reports the second turn execution 
   const secondStop = await runStop({
     input: { session_id: sessionId },
     dataDir,
-    nowIso: '2026-04-12T19:00:27.654Z'
+    nowIso: '2026-04-13T05:00:27.654+10:00'
   });
 
   assert.equal(secondStop.code, 0, `expected success, stderr was: ${secondStop.stderr}`);
@@ -172,7 +172,7 @@ test('prompt, stop, prompt, stop, then prompt reports the second turn execution 
   const thirdPrompt = await runUserPromptSubmit({
     input: { session_id: sessionId },
     dataDir,
-    nowIso: '2026-04-12T19:01:00.000Z'
+    nowIso: '2026-04-13T05:01:00.000+10:00'
   });
 
   assert.equal(thirdPrompt.code, 0, `expected success, stderr was: ${thirdPrompt.stderr}`);
@@ -181,11 +181,11 @@ test('prompt, stop, prompt, stop, then prompt reports the second turn execution 
     hookSpecificOutput: {
       hookEventName: 'UserPromptSubmit',
       additionalContext: [
-        '[message_timing]',
-        'user_message_utc: 2026-04-12T19:01:00.000Z',
-        'idle_since_last_stop_seconds: 32.3',
-        'last_turn_exec_seconds: 8.4',
-        '[/message_timing]'
+        '[timing]',
+        'time=2026-04-13T05:01:00+10:00',
+        'idle_for=32.3s',
+        'last_turn=8.4s',
+        '[/timing]'
       ].join('\n')
     }
   });
@@ -198,7 +198,7 @@ test('prompt after more than one idle minute includes a visible TUI system messa
   const firstPrompt = await runUserPromptSubmit({
     input: { session_id: sessionId },
     dataDir,
-    nowIso: '2026-04-12T19:00:00.000Z'
+    nowIso: '2026-04-13T05:00:00.000+10:00'
   });
 
   assert.equal(firstPrompt.code, 0, `expected success, stderr was: ${firstPrompt.stderr}`);
@@ -207,7 +207,7 @@ test('prompt after more than one idle minute includes a visible TUI system messa
   const stopResult = await runStop({
     input: { session_id: sessionId },
     dataDir,
-    nowIso: '2026-04-12T19:00:04.321Z'
+    nowIso: '2026-04-13T05:00:04.321+10:00'
   });
 
   assert.equal(stopResult.code, 0, `expected success, stderr was: ${stopResult.stderr}`);
@@ -216,7 +216,7 @@ test('prompt after more than one idle minute includes a visible TUI system messa
   const secondPrompt = await runUserPromptSubmit({
     input: { session_id: sessionId },
     dataDir,
-    nowIso: '2026-04-12T19:05:06.321Z'
+    nowIso: '2026-04-13T05:05:06.321+10:00'
   });
 
   assert.equal(secondPrompt.code, 0, `expected success, stderr was: ${secondPrompt.stderr}`);
@@ -226,11 +226,11 @@ test('prompt after more than one idle minute includes a visible TUI system messa
     hookSpecificOutput: {
       hookEventName: 'UserPromptSubmit',
       additionalContext: [
-        '[message_timing]',
-        'user_message_utc: 2026-04-12T19:05:06.321Z',
-        'idle_since_last_stop_seconds: 302.0',
-        'last_turn_exec_seconds: 4.3',
-        '[/message_timing]'
+        '[timing]',
+        'time=2026-04-13T05:05:06+10:00',
+        'idle_for=302.0s',
+        'last_turn=4.3s',
+        '[/timing]'
       ].join('\n')
     }
   });

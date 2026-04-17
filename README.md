@@ -4,20 +4,20 @@ Claude Code plugin that injects hidden timing context alongside each user messag
 
 ![Idle note on re-entry plus a live statusline timer tracking elapsed time since Claude's last reply](docs/screenshots/hero.png)
 
-The plugin adds:
+The plugin adds three fields inside a compact `[timing]` block:
 
-- `user_message_utc`
-- `idle_since_last_stop_seconds`
-- `last_turn_exec_seconds`
+- `time` — local time with explicit UTC offset
+- `idle_for` — seconds idle since the assistant's last stop
+- `last_turn` — seconds the previous assistant turn took to run
 
 Each prompt gets a hidden block Claude reads but you never see in your transcript:
 
 ```
-[message_timing]
-user_message_utc: 2026-04-17T05:07:18.228Z
-idle_since_last_stop_seconds: 17.0
-last_turn_exec_seconds: 3.7
-[/message_timing]
+[timing]
+time=2026-04-17T16:04:19+10:00
+idle_for=57.0s
+last_turn=88.2s
+[/timing]
 ```
 
 ## What It Does
@@ -99,6 +99,12 @@ Validate the plugin structure:
 
 ```bash
 claude plugin validate .
+```
+
+Count the tokens used by the timing block across representative payloads (uses `gpt-tokenizer` as a BPE proxy):
+
+```bash
+bun run tokens
 ```
 
 ## Notes

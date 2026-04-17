@@ -2,8 +2,29 @@ function toIsoUtc(value) {
   return new Date(value).toISOString();
 }
 
+function toLocalIso(date) {
+  const pad = (n) => String(n).padStart(2, '0');
+  const year = date.getFullYear();
+  const month = pad(date.getMonth() + 1);
+  const day = pad(date.getDate());
+  const hour = pad(date.getHours());
+  const minute = pad(date.getMinutes());
+  const second = pad(date.getSeconds());
+  const ms = String(date.getMilliseconds()).padStart(3, '0');
+  const offsetMin = -date.getTimezoneOffset();
+  const sign = offsetMin >= 0 ? '+' : '-';
+  const absOff = Math.abs(offsetMin);
+  const offH = pad(Math.floor(absOff / 60));
+  const offM = pad(absOff % 60);
+  return `${year}-${month}-${day}T${hour}:${minute}:${second}.${ms}${sign}${offH}:${offM}`;
+}
+
 function getNowIso(env = process.env, nowFactory = () => new Date()) {
-  return env.CLAUDE_TIMING_NOW_ISO || nowFactory().toISOString();
+  return env.CLAUDE_TIMING_NOW_ISO || toLocalIso(nowFactory());
+}
+
+function stripMs(iso) {
+  return iso.replace(/\.\d+(?=Z$|[+-]\d{2}:\d{2}$)/, '');
 }
 
 function diffMs(laterIso, earlierIso) {
@@ -23,6 +44,8 @@ function diffMs(laterIso, earlierIso) {
 
 module.exports = {
   toIsoUtc,
+  toLocalIso,
   getNowIso,
+  stripMs,
   diffMs
 };

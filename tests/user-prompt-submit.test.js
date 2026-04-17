@@ -44,9 +44,9 @@ function runUserPromptSubmit({ input, dataDir, nowIso }) {
   });
 }
 
-test('first prompt injects only the UTC timestamp block and persists lastUserPromptAt', async () => {
+test('first prompt injects only the timestamp block and persists lastUserPromptAt', async () => {
   const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-user-prompt-'));
-  const nowIso = '2026-04-12T19:00:00.000Z';
+  const nowIso = '2026-04-13T05:00:00.000+10:00';
 
   const result = await runUserPromptSubmit({
     input: { session_id: 'session-1' },
@@ -59,7 +59,7 @@ test('first prompt injects only the UTC timestamp block and persists lastUserPro
   assert.deepEqual(parseHookOutput(result.stdout), {
     hookSpecificOutput: {
       hookEventName: 'UserPromptSubmit',
-      additionalContext: ['[message_timing]', `user_message_utc: ${nowIso}`, '[/message_timing]'].join('\n')
+      additionalContext: ['[timing]', 'time=2026-04-13T05:00:00+10:00', '[/timing]'].join('\n')
     }
   });
 
@@ -73,7 +73,7 @@ test('first prompt injects only the UTC timestamp block and persists lastUserPro
 
 test('later prompts include idle and previous execution timings from state', async () => {
   const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-user-prompt-'));
-  const nowIso = '2026-04-12T19:00:10.000Z';
+  const nowIso = '2026-04-13T05:00:10.000+10:00';
 
   fs.mkdirSync(path.join(dataDir, 'sessions'), { recursive: true });
   fs.writeFileSync(
@@ -81,10 +81,10 @@ test('later prompts include idle and previous execution timings from state', asy
     JSON.stringify(
       {
         sessionId: 'session-1',
-        lastAssistantMessageAt: '2026-04-12T19:00:03.000Z',
-        lastStopAt: '2026-04-12T19:00:04.500Z',
+        lastAssistantMessageAt: '2026-04-13T05:00:03.000+10:00',
+        lastStopAt: '2026-04-13T05:00:04.500+10:00',
         lastTurnExecMs: 4321,
-        lastUserPromptAt: '2026-04-12T18:59:00.000Z'
+        lastUserPromptAt: '2026-04-13T04:59:00.000+10:00'
       },
       null,
       2
@@ -103,11 +103,11 @@ test('later prompts include idle and previous execution timings from state', asy
     hookSpecificOutput: {
       hookEventName: 'UserPromptSubmit',
       additionalContext: [
-        '[message_timing]',
-        `user_message_utc: ${nowIso}`,
-        'idle_since_last_stop_seconds: 5.5',
-        'last_turn_exec_seconds: 4.3',
-        '[/message_timing]'
+        '[timing]',
+        'time=2026-04-13T05:00:10+10:00',
+        'idle_for=5.5s',
+        'last_turn=4.3s',
+        '[/timing]'
       ].join('\n')
     }
   });
@@ -115,7 +115,7 @@ test('later prompts include idle and previous execution timings from state', asy
   const statePath = path.join(dataDir, 'sessions', 'session-1.json');
   assert.deepEqual(JSON.parse(fs.readFileSync(statePath, 'utf8')), {
     sessionId: 'session-1',
-    lastAssistantMessageAt: '2026-04-12T19:00:03.000Z',
+    lastAssistantMessageAt: '2026-04-13T05:00:03.000+10:00',
     lastStopAt: null,
     lastTurnExecMs: 4321,
     lastUserPromptAt: nowIso
@@ -124,7 +124,7 @@ test('later prompts include idle and previous execution timings from state', asy
 
 test('idle gaps over one minute are shown to the user without adding the note to additionalContext', async () => {
   const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-user-prompt-'));
-  const nowIso = '2026-04-12T19:05:06.000Z';
+  const nowIso = '2026-04-13T05:05:06.000+10:00';
 
   fs.mkdirSync(path.join(dataDir, 'sessions'), { recursive: true });
   fs.writeFileSync(
@@ -132,9 +132,9 @@ test('idle gaps over one minute are shown to the user without adding the note to
     JSON.stringify(
       {
         sessionId: 'session-1',
-        lastStopAt: '2026-04-12T19:00:04.000Z',
+        lastStopAt: '2026-04-13T05:00:04.000+10:00',
         lastTurnExecMs: 4321,
-        lastUserPromptAt: '2026-04-12T18:59:00.000Z'
+        lastUserPromptAt: '2026-04-13T04:59:00.000+10:00'
       },
       null,
       2
@@ -154,11 +154,11 @@ test('idle gaps over one minute are shown to the user without adding the note to
     hookSpecificOutput: {
       hookEventName: 'UserPromptSubmit',
       additionalContext: [
-        '[message_timing]',
-        `user_message_utc: ${nowIso}`,
-        'idle_since_last_stop_seconds: 302.0',
-        'last_turn_exec_seconds: 4.3',
-        '[/message_timing]'
+        '[timing]',
+        'time=2026-04-13T05:05:06+10:00',
+        'idle_for=302.0s',
+        'last_turn=4.3s',
+        '[/timing]'
       ].join('\n')
     }
   });
@@ -170,7 +170,7 @@ test('missing session_id fails before any state access', async () => {
   const result = await runUserPromptSubmit({
     input: {},
     dataDir,
-    nowIso: '2026-04-12T19:00:10.000Z'
+    nowIso: '2026-04-13T05:00:10.000+10:00'
   });
 
   assert.equal(result.code, 1);
