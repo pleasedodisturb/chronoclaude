@@ -2,11 +2,23 @@
 
 Claude Code plugin that injects hidden timing context alongside each user message.
 
+![Idle note on re-entry plus a live statusline timer tracking elapsed time since Claude's last reply](docs/screenshots/hero.png)
+
 The plugin adds:
 
 - `user_message_utc`
 - `idle_since_last_stop_seconds`
 - `last_turn_exec_seconds`
+
+Each prompt gets a hidden block Claude reads but you never see in your transcript:
+
+```
+[message_timing]
+user_message_utc: 2026-04-17T05:07:18.228Z
+idle_since_last_stop_seconds: 17.0
+last_turn_exec_seconds: 3.7
+[/message_timing]
+```
 
 ## What It Does
 
