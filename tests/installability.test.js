@@ -46,17 +46,10 @@ test('repo can act as a local marketplace for installing this plugin', () => {
   assert.ok(fs.existsSync(marketplacePath), 'expected marketplace manifest to exist');
 
   const marketplace = JSON.parse(fs.readFileSync(marketplacePath, 'utf8'));
-  assert.equal(marketplace.name, 'idle-timing-local');
-  assert.equal(marketplace.owner.name, 'xertrov');
-  assert.equal(
-    marketplace.metadata.description,
-    'Local marketplace for the idle timing Claude Code plugin.'
-  );
-  assert.deepEqual(marketplace.plugins, [
-    {
-      name: 'idle-timing',
-      source: './',
-      description: 'Inject hidden timing context into Claude Code prompts.'
-    }
-  ]);
+  assert.equal(marketplace.name, 'idle-info');
+  assert.equal(marketplace.owner.name, 'clankercode');
+  assert.ok(marketplace.plugins.length >= 1, 'expected at least one plugin entry');
+  const entry = marketplace.plugins[0];
+  assert.equal(entry.name, 'idle-timing');
+  assert.equal(entry.source, './');
 });

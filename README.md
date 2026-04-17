@@ -18,6 +18,13 @@ The plugin uses official Claude Code hooks:
 
 On a fresh session, unavailable prior-turn fields are omitted.
 
+## Install via Marketplace
+
+```text
+/plugin marketplace add clankercode/claude-inject-idle-time
+/plugin install idle-timing@idle-info
+```
+
 ## Local Usage
 
 Run Claude Code with the plugin from this repo root:
