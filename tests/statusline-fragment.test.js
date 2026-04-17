@@ -193,3 +193,155 @@ test('fragment prints empty when CLAUDE_PLUGIN_DATA is not set', async () => {
   assert.equal(result.code, 0);
   assert.equal(result.stdout, '');
 });
+
+test('fragment captures model on first tick after a stop', async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-fragment-'));
+  const sessionId = 'session-model-capture';
+  const stopAt = '2026-04-12T19:00:00.000Z';
+
+  seedSessionState(dataDir, sessionId, {
+    lastStopAt: stopAt
+  });
+
+  const result = await runFragment({
+    input: JSON.stringify({
+      session_id: sessionId,
+      model: { id: 'claude-opus-4-7' }
+    }),
+    dataDir,
+    nowIso: '2026-04-12T19:00:10.000Z'
+  });
+
+  assert.equal(result.code, 0, `stderr: ${result.stderr}`);
+  assert.equal(result.stdout, '10s');
+
+  const saved = JSON.parse(
+    fs.readFileSync(path.join(dataDir, 'sessions', `${sessionId}.json`), 'utf8')
+  );
+  assert.equal(saved.modelAtLastStop, 'claude-opus-4-7');
+  assert.equal(saved.modelAtLastStopAt, stopAt);
+});
+
+test('fragment prints --- when model changed since capture', async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-fragment-'));
+  const sessionId = 'session-model-changed';
+  const stopAt = '2026-04-12T19:00:00.000Z';
+
+  seedSessionState(dataDir, sessionId, {
+    lastStopAt: stopAt,
+    modelAtLastStop: 'claude-sonnet-4-6',
+    modelAtLastStopAt: stopAt
+  });
+
+  const result = await runFragment({
+    input: JSON.stringify({
+      session_id: sessionId,
+      model: { id: 'claude-opus-4-7' }
+    }),
+    dataDir,
+    nowIso: '2026-04-12T19:00:30.000Z'
+  });
+
+  assert.equal(result.code, 0, `stderr: ${result.stderr}`);
+  assert.equal(result.stdout, '---');
+});
+
+test('fragment shows elapsed time when current model matches captured model', async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-fragment-'));
+  const sessionId = 'session-model-same';
+  const stopAt = '2026-04-12T19:00:00.000Z';
+
+  seedSessionState(dataDir, sessionId, {
+    lastStopAt: stopAt,
+    modelAtLastStop: 'claude-sonnet-4-6',
+    modelAtLastStopAt: stopAt
+  });
+
+  const result = await runFragment({
+    input: JSON.stringify({
+      session_id: sessionId,
+      model: { id: 'claude-sonnet-4-6' }
+    }),
+    dataDir,
+    nowIso: '2026-04-12T19:00:15.000Z'
+  });
+
+  assert.equal(result.code, 0, `stderr: ${result.stderr}`);
+  assert.equal(result.stdout, '15s');
+});
+
+test('fragment re-captures model when a newer lastStopAt is seen', async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-fragment-'));
+  const sessionId = 'session-model-recapture';
+  const newerStopAt = '2026-04-12T19:00:00.000Z';
+  const olderStopAt = '2026-04-12T18:00:00.000Z';
+
+  seedSessionState(dataDir, sessionId, {
+    lastStopAt: newerStopAt,
+    modelAtLastStop: 'claude-sonnet-4-6',
+    modelAtLastStopAt: olderStopAt
+  });
+
+  const result = await runFragment({
+    input: JSON.stringify({
+      session_id: sessionId,
+      model: { id: 'claude-opus-4-7' }
+    }),
+    dataDir,
+    nowIso: '2026-04-12T19:00:20.000Z'
+  });
+
+  assert.equal(result.code, 0, `stderr: ${result.stderr}`);
+  assert.equal(result.stdout, '20s');
+
+  const saved = JSON.parse(
+    fs.readFileSync(path.join(dataDir, 'sessions', `${sessionId}.json`), 'utf8')
+  );
+  assert.equal(saved.modelAtLastStop, 'claude-opus-4-7');
+  assert.equal(saved.modelAtLastStopAt, newerStopAt);
+});
+
+test('fragment --model-id flag overrides stdin model', async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-fragment-'));
+  const sessionId = 'session-model-flag';
+  const stopAt = '2026-04-12T19:00:00.000Z';
+
+  seedSessionState(dataDir, sessionId, {
+    lastStopAt: stopAt,
+    modelAtLastStop: 'claude-sonnet-4-6',
+    modelAtLastStopAt: stopAt
+  });
+
+  const result = await runFragment({
+    input: JSON.stringify({
+      session_id: sessionId,
+      model: { id: 'claude-sonnet-4-6' }
+    }),
+    args: ['--model-id', 'claude-opus-4-7'],
+    dataDir,
+    nowIso: '2026-04-12T19:00:05.000Z'
+  });
+
+  assert.equal(result.code, 0);
+  assert.equal(result.stdout, '---');
+});
+
+test('fragment ignores model tracking when no model id is available', async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-fragment-'));
+  const sessionId = 'session-no-model';
+
+  seedSessionState(dataDir, sessionId, {
+    lastStopAt: '2026-04-12T19:00:00.000Z',
+    modelAtLastStop: 'claude-sonnet-4-6',
+    modelAtLastStopAt: '2026-04-12T19:00:00.000Z'
+  });
+
+  const result = await runFragment({
+    input: JSON.stringify({ session_id: sessionId }),
+    dataDir,
+    nowIso: '2026-04-12T19:00:05.000Z'
+  });
+
+  assert.equal(result.code, 0);
+  assert.equal(result.stdout, '5s');
+});

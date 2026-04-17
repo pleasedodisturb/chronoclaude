@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 
-const { loadSessionState } = require('../src/state');
+const { loadSessionState, saveSessionState } = require('../src/state');
 const { getNowIso, diffMs } = require('../src/time');
 const { formatElapsed } = require('../src/duration');
 
 const DEFAULT_DROP_SECONDS_AFTER = 900;
+const MODEL_CHANGED_PLACEHOLDER = '---';
 
 async function readStdin() {
   if (process.stdin.isTTY) {
@@ -21,7 +22,11 @@ async function readStdin() {
 }
 
 function parseArgs(argv) {
-  const args = { sessionId: null, dropSecondsAfterSeconds: DEFAULT_DROP_SECONDS_AFTER };
+  const args = {
+    sessionId: null,
+    modelId: null,
+    dropSecondsAfterSeconds: DEFAULT_DROP_SECONDS_AFTER
+  };
 
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
@@ -31,6 +36,11 @@ function parseArgs(argv) {
       i += 1;
     } else if (arg.startsWith('--session-id=')) {
       args.sessionId = arg.slice('--session-id='.length) || null;
+    } else if (arg === '--model-id') {
+      args.modelId = argv[i + 1] || null;
+      i += 1;
+    } else if (arg.startsWith('--model-id=')) {
+      args.modelId = arg.slice('--model-id='.length) || null;
     } else if (arg === '--drop-seconds-after') {
       args.dropSecondsAfterSeconds = Number(argv[i + 1]);
       i += 1;
@@ -46,24 +56,28 @@ function parseArgs(argv) {
   return args;
 }
 
-function resolveSessionId(stdinRaw, argSessionId) {
-  if (argSessionId) {
-    return argSessionId;
-  }
-
-  if (!stdinRaw) {
-    return null;
-  }
-
+function parseStdinJson(stdinRaw) {
+  if (!stdinRaw) return null;
   try {
-    const parsed = JSON.parse(stdinRaw);
-    if (parsed && typeof parsed.session_id === 'string' && parsed.session_id) {
-      return parsed.session_id;
-    }
+    return JSON.parse(stdinRaw);
   } catch {
     return null;
   }
+}
 
+function resolveSessionId(stdinJson, argSessionId) {
+  if (argSessionId) return argSessionId;
+  if (stdinJson && typeof stdinJson.session_id === 'string' && stdinJson.session_id) {
+    return stdinJson.session_id;
+  }
+  return null;
+}
+
+function resolveModelId(stdinJson, argModelId) {
+  if (argModelId) return argModelId;
+  if (stdinJson && stdinJson.model && typeof stdinJson.model.id === 'string' && stdinJson.model.id) {
+    return stdinJson.model.id;
+  }
   return null;
 }
 
@@ -76,7 +90,8 @@ async function main() {
   }
 
   const rawInput = await readStdin();
-  const sessionId = resolveSessionId(rawInput, args.sessionId);
+  const stdinJson = parseStdinJson(rawInput);
+  const sessionId = resolveSessionId(stdinJson, args.sessionId);
 
   if (!sessionId) {
     return;
@@ -88,7 +103,27 @@ async function main() {
     return;
   }
 
-  const elapsedMs = diffMs(getNowIso(), session.lastStopAt);
+  const currentModelId = resolveModelId(stdinJson, args.modelId);
+  const stopAt = session.lastStopAt;
+
+  if (currentModelId) {
+    if (session.modelAtLastStopAt !== stopAt) {
+      await saveSessionState({
+        dataDir,
+        sessionId,
+        state: {
+          ...session,
+          modelAtLastStop: currentModelId,
+          modelAtLastStopAt: stopAt
+        }
+      });
+    } else if (session.modelAtLastStop && session.modelAtLastStop !== currentModelId) {
+      process.stdout.write(MODEL_CHANGED_PLACEHOLDER);
+      return;
+    }
+  }
+
+  const elapsedMs = diffMs(getNowIso(), stopAt);
   const formatted = formatElapsed(elapsedMs, {
     dropSecondsAfterSeconds: args.dropSecondsAfterSeconds
   });
