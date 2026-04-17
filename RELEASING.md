@@ -44,6 +44,12 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
+Pushing a `v*` tag that points at a commit on `origin/master` triggers
+`.github/workflows/release.yml`, which re-runs `npm run prerelease`,
+verifies `plugin.json` matches the tag version, extracts the matching
+section from `CHANGELOG.md`, and publishes a GitHub release
+automatically.
+
 ## Marketplace install command (for release notes / issue comments)
 
 ```text

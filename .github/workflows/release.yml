@@ -1,0 +1,79 @@
+name: Release on version tag
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify tag is reachable from master
+        run: |
+          tag_sha="$(git rev-parse "${GITHUB_REF_NAME}^{commit}")"
+          if ! git merge-base --is-ancestor "$tag_sha" origin/master; then
+            echo "::error::Tag ${GITHUB_REF_NAME} is not an ancestor of origin/master. Refusing to release."
+            exit 1
+          fi
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Verify tag matches plugin version
+        run: |
+          tag_version="${GITHUB_REF_NAME#v}"
+          plugin_version="$(node -p "require('./.claude-plugin/plugin.json').version")"
+          if [ "$tag_version" != "$plugin_version" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} (version $tag_version) does not match plugin.json version $plugin_version"
+            exit 1
+          fi
+          echo "Tag and plugin.json agree on version $tag_version"
+
+      - name: Run prerelease gate
+        run: npm run prerelease
+
+      - name: Extract release notes from CHANGELOG
+        id: notes
+        run: |
+          tag_version="${GITHUB_REF_NAME#v}"
+          notes_file="$(mktemp)"
+          awk -v ver="$tag_version" '
+            $0 ~ "^## \\[" ver "\\]" { flag=1; next }
+            /^## \[/ && flag { exit }
+            flag { print }
+          ' CHANGELOG.md > "$notes_file"
+
+          if [ ! -s "$notes_file" ]; then
+            echo "::error::No CHANGELOG section found for version $tag_version"
+            exit 1
+          fi
+
+          {
+            cat "$notes_file"
+            printf '\n## Install\n\n'
+            printf '```text\n'
+            printf '/plugin marketplace add clankercode/claude-inject-idle-time\n'
+            printf '/plugin install idle-timing@idle-info\n'
+            printf '```\n'
+          } > "${notes_file}.final"
+
+          echo "notes_path=${notes_file}.final" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME" \
+            --notes-file "${{ steps.notes.outputs.notes_path }}"
