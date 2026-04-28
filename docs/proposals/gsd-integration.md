@@ -9,14 +9,19 @@ is a community Claude Code plugin that gives the model a sense of
 wall-clock time and user-idle gaps — something Claude Code does not
 expose natively today.
 
-It works in three modes:
+The design has three modes; **only passive ships in this repo today**.
+Active and retrospective live in the upstream sources referenced below
+and would integrate via [clankercode/claude-inject-idle-time#1](https://github.com/clankercode/claude-inject-idle-time/pull/1)
+(active) and a port of `s-a-s-k-i-a/claude-code-timestamps` (retrospective).
+This proposal discusses all three so the integration question can be
+decided once; the ask itself (Tier A below) only depends on what ships.
 
-- **Passive** — hidden `[timing]` block (`time`, `idle_for`, `last_turn`) injected on every prompt via `UserPromptSubmit`. ~42 tokens/turn.
-- **Active** — MCP server with `get_time`, `time_diff`, `mark_event`, `get_timeline` tools.
-- **Retrospective** — `/timestamps [count]` slash command renders a wall-clock timeline from the session transcript.
+- **Passive** *(ships in this repo)* — hidden `[timing]` block (`time`, `idle_for`, `last_turn`) injected on every prompt via `UserPromptSubmit`. ~42 tokens/turn (gpt-tokenizer BPE estimate; Anthropic's tokenizer may differ).
+- **Active** *(upstream PR, not yet integrated)* — MCP server with `get_time`, `time_diff`, `mark_event`, `get_timeline` tools.
+- **Retrospective** *(upstream, not yet ported)* — `/timestamps [count]` slash command rendering a wall-clock timeline from the session transcript.
 
-It also ships a statusline fragment (live elapsed-since-last-reply) and a
-TUI re-entry note (`[after 5m 2s]`).
+The shipping repo also includes a statusline fragment (live
+elapsed-since-last-reply) and a TUI re-entry note (`[after 5m 2s]`).
 
 This is a proposal to recommend it alongside [GSD](https://github.com/gsd-build/get-shit-done)
 and discuss tighter integration. It is **not** a request to merge code into
@@ -109,9 +114,11 @@ and the plugin doesn't need to integrate here.
 **Q3 — "Does compaction during a parallel wave produce misleading `idle_for` on still-active subagent sessions?"**
 
 Verified by code inspection (`src/state.js`, `scripts/pre-compact.js`):
-state files are keyed by `session_id`, and `PreCompact` only resets
-the session that fired the hook. Compaction on the orchestrator
-cannot corrupt subagent state files because they're separate files.
+state files are keyed by `session_id`, and `PreCompact` only advances
+`lastStopAt`/`lastAssistantMessageAt` to `now` for the session that
+fired the hook (and nulls model markers). Compaction on the
+orchestrator cannot reach subagent state files because they're
+separate files.
 
 In practice this is moot today — subagents don't receive `[timing]`
 at all (see Tier B framing). With option 4 (spawn-time propagation),
@@ -177,7 +184,7 @@ Not a duplicate of [#2410](https://github.com/gsd-build/get-shit-done/issues/241
 
 ### Anthropic issues this addresses
 
-- [anthropics/claude-code#44763](https://github.com/anthropics/claude-code/issues/44763) — Add timestamps to conversation messages.
+- [anthropics/claude-code#44763](https://github.com/anthropics/claude-code/issues/44763) — Show timestamps on conversation messages.
 - [anthropics/claude-code#47160](https://github.com/anthropics/claude-code/issues/47160) — Expose message timestamps to the model.
 
 ### Adjacent GSD threads
