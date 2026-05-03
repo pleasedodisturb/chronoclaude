@@ -1,6 +1,6 @@
 # Proposal: temporal context as a first-class signal for GSD
 
-> **Revised 2026-04-28** in response to [@trek-e's review](https://github.com/gsd-build/get-shit-done/issues/2756#issuecomment-4323379458). Changes: tier-split the recommendation by cost/value, scale back the "value for agents" claims to what's deterministic today, narrow option 3 to what's actually additive over the existing `HANDOFF.timestamp` field.
+> **Revised 2026-05-03**: previous revisions claimed only passive shipped in this repo. That was wrong — the WIP feature branch had the active MCP server and retrospective `/timestamps` ready but unmerged at master HEAD. The branch is now merged; all three modes ship. This revision reflects that. (Earlier 2026-04-28 revision: tier-split per @trek-e's review, scaled back "value for agents" claims to what's deterministic today, narrowed option 3 to additive fields.)
 
 ## What this is
 
@@ -9,19 +9,14 @@ is a community Claude Code plugin that gives the model a sense of
 wall-clock time and user-idle gaps — something Claude Code does not
 expose natively today.
 
-The design has three modes; **only passive ships in this repo today**.
-Active and retrospective live in the upstream sources referenced below
-and would integrate via [clankercode/claude-inject-idle-time#1](https://github.com/clankercode/claude-inject-idle-time/pull/1)
-(active) and a port of `s-a-s-k-i-a/claude-code-timestamps` (retrospective).
-This proposal discusses all three so the integration question can be
-decided once; the ask itself (Tier A below) only depends on what ships.
+It ships three modes today:
 
-- **Passive** *(ships in this repo)* — hidden `[timing]` block (`time`, `idle_for`, `last_turn`) injected on every prompt via `UserPromptSubmit`. ~42 tokens/turn (gpt-tokenizer BPE estimate; Anthropic's tokenizer may differ).
-- **Active** *(upstream PR, not yet integrated)* — MCP server with `get_time`, `time_diff`, `mark_event`, `get_timeline` tools.
-- **Retrospective** *(upstream, not yet ported)* — `/timestamps [count]` slash command rendering a wall-clock timeline from the session transcript.
+- **Passive** — hidden `[timing]` block (`time`, `idle_for`, `last_turn`) injected on every prompt via `UserPromptSubmit`. ~42 tokens/turn (gpt-tokenizer BPE estimate; Anthropic's tokenizer may differ).
+- **Active** — MCP server (`servers/time-server.js`) exposing `get_time`, `time_diff`, `mark_event`, `get_timeline`. PostToolUse hook also auto-logs a per-session timeline to disk.
+- **Retrospective** — `/timestamps [count]` slash command rendering a wall-clock timeline from the session transcript via `scripts/parse-transcript.py`.
 
-The shipping repo also includes a statusline fragment (live
-elapsed-since-last-reply) and a TUI re-entry note (`[after 5m 2s]`).
+Plus a statusline fragment (live elapsed-since-last-reply) and a TUI
+re-entry note (`[after 5m 2s]`).
 
 This is a proposal to recommend it alongside [GSD](https://github.com/gsd-build/get-shit-done)
 and discuss tighter integration. It is **not** a request to merge code into
@@ -136,11 +131,7 @@ integration tests.
 | --- | --- |
 | [`clankercode/claude-inject-idle-time`](https://github.com/clankercode/claude-inject-idle-time) | The passive `[timing]` block injected via `UserPromptSubmit`, the `Stop` and `PreCompact` hooks, and the statusline fragment with model-change handling. |
 | [`s-a-s-k-i-a/claude-code-timestamps`](https://github.com/s-a-s-k-i-a/claude-code-timestamps) (MIT) | The retrospective `/timestamps` slash command — reads `.jsonl` session transcripts and renders a wall-clock timeline. |
-
-On top of those, [clankercode/claude-inject-idle-time#1](https://github.com/clankercode/claude-inject-idle-time/pull/1)
-adds the **active** mode: an MCP server exposing `get_time`, `time_diff`,
-`mark_event`, and `get_timeline`, plus automatic session-timeline logging via
-a `PostToolUse` hook.
+| [`clankercode/claude-inject-idle-time#1`](https://github.com/clankercode/claude-inject-idle-time/pull/1) | The active MCP server (`get_time`, `time_diff`, `mark_event`, `get_timeline`) plus a `PostToolUse` hook that auto-logs a per-session timeline. |
 
 ## Integration options (low → high effort)
 
