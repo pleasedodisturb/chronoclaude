@@ -98,6 +98,24 @@ test('post-tool-use writes nothing when CLAUDE_TIMING_TIMELINE is disabled', () 
   );
 });
 
+test('post-tool-use stays disabled across off/false/no toggle variants', () => {
+  for (const value of ['off', 'false', 'no']) {
+    const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-ptu-'));
+
+    execFileSync('node', [SCRIPT_PATH], {
+      input: JSON.stringify({ session_id: 'session-off', tool_name: 'Bash' }),
+      env: { ...process.env, CLAUDE_PLUGIN_DATA: dataDir, CLAUDE_TIMING_TIMELINE: value },
+      timeout: 5000
+    });
+
+    assert.equal(
+      fs.existsSync(path.join(dataDir, 'timelines')),
+      false,
+      `expected no timeline when disabled via ${value}`
+    );
+  }
+});
+
 test('post-tool-use defaults tool name to unknown', () => {
   const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-ptu-'));
   const input = JSON.stringify({ session_id: 'session-x' });

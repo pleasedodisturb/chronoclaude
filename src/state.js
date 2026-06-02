@@ -53,6 +53,7 @@ async function saveSessionState({ dataDir, sessionId, state }) {
 }
 
 module.exports = {
+  sanitizeSessionId,
   getSessionFilePath,
   loadSessionState,
   saveSessionState

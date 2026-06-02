@@ -6,6 +6,18 @@ const os = require('node:os');
 const path = require('node:path');
 
 const SERVER_PATH = path.join(__dirname, '..', 'servers', 'time-server.js');
+// Requiring the module returns pure helpers without booting the stdio server
+// (guarded by require.main === module).
+const { resolveDataDir } = require('../servers/time-server');
+
+test('resolveDataDir prefers CLAUDE_PLUGIN_DATA when set', () => {
+  assert.equal(resolveDataDir({ CLAUDE_PLUGIN_DATA: '/tmp/custom-data' }), '/tmp/custom-data');
+});
+
+test('resolveDataDir falls back to the documented plugin data path', () => {
+  const dir = resolveDataDir({});
+  assert.match(dir, /[/\\]\.claude[/\\]plugins[/\\]data[/\\]idle-timing-idle-info$/);
+});
 
 function startServer(options = {}) {
   // Point the server at an isolated, empty data dir by default so get_timeline's
@@ -258,6 +270,29 @@ test('get_timeline merges in-memory marks with the PostToolUse disk timeline (by
   assert.deepEqual(data.events.map((e) => e.kind), ['tool', 'tool', 'mark']);
   assert.equal(data.events[0].since_prev_ms, null);
   assert.equal(data.events[1].since_prev_ms, 10000);
+  server.kill();
+});
+
+test('get_timeline interleaves a mark chronologically between disk events', async () => {
+  // A far-past and far-future tool event straddle the mark's real wall-clock
+  // time, so the mark must sort *between* them — exercising true interleaving.
+  const dataDir = seedTimeline([
+    { timestamp: '2020-01-01T00:00:00.000+00:00', tool: 'Past', event: 'tool_complete' },
+    { timestamp: '2099-01-01T00:00:00.000+00:00', tool: 'Future', event: 'tool_complete' }
+  ]);
+
+  const server = startServer({ dataDir });
+  await server.init();
+  await server.callTool('mark_event', { name: 'mid' });
+  const res = await server.callTool('get_timeline', { session_id: 'sess' });
+  const data = JSON.parse(res.result.content[0].text);
+
+  assert.equal(data.event_count, 3);
+  assert.deepEqual(data.events.map((e) => e.name), ['Past', 'mid', 'Future']);
+  assert.deepEqual(data.events.map((e) => e.kind), ['tool', 'mark', 'tool']);
+  // gaps are positive and ordered (no negative since_prev from a bad sort)
+  assert.ok(data.events[1].since_prev_ms > 0);
+  assert.ok(data.events[2].since_prev_ms > 0);
   server.kill();
 });
 

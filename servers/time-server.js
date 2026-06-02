@@ -17,9 +17,14 @@ const path = require('node:path');
 const os = require('node:os');
 const { getNowIso, diffMs, toLocalIso } = require('../src/time');
 const { formatElapsed } = require('../src/duration');
+const { sanitizeSessionId } = require('../src/state');
 
 const SERVER_INFO = { name: 'idle-timing-time-server', version: '0.4.0' };
 const DROP_SECONDS_AFTER = 900;
+// Defensive cap on the disk timeline read: a normal session logs ~60 bytes per
+// tool call, so 10 MB (~170k calls) is far beyond any real session. Guards
+// against reading a pathologically large or non-regular file into memory.
+const MAX_TIMELINE_BYTES = 10 * 1024 * 1024;
 
 // In-memory event log (session-scoped, resets on server restart)
 const eventLog = [];
@@ -39,10 +44,6 @@ function resolveDataDir(env = process.env) {
   // MCP servers may launch without CLAUDE_PLUGIN_DATA set; fall back to the
   // documented install path (see repo CLAUDE.md / statusline note).
   return path.join(os.homedir(), '.claude', 'plugins', 'data', 'idle-timing-idle-info');
-}
-
-function sanitizeSessionId(sessionId) {
-  return String(sessionId).replace(/[^A-Za-z0-9._-]/g, '_');
 }
 
 // Returns parsed `{timestamp, tool, event}` lines from the on-disk tool
@@ -72,6 +73,12 @@ function readDiskTimeline(sessionId, env = process.env) {
         }))
         .sort((a, b) => b.mtimeMs - a.mtimeMs)[0].name;
       file = path.join(dir, file);
+    }
+
+    const stat = fs.statSync(file);
+
+    if (!stat.isFile() || stat.size > MAX_TIMELINE_BYTES) {
+      return []; // skip non-regular files (fifo/symlink-to-device) and oversized logs
     }
 
     return fs
@@ -291,11 +298,21 @@ function handleMessage(msg) {
       });
     }
 
-    const text = handler(params.arguments || {});
+    // Never let a handler throw unwind past here — that would leave the client
+    // waiting forever for a response to this request id. Always return an
+    // error envelope instead.
+    try {
+      const text = handler(params.arguments || {});
 
-    return makeResponse(id, {
-      content: [{ type: 'text', text }]
-    });
+      return makeResponse(id, {
+        content: [{ type: 'text', text }]
+      });
+    } catch (err) {
+      return makeResponse(id, {
+        content: [{ type: 'text', text: JSON.stringify({ error: String((err && err.message) || err) }) }],
+        isError: true
+      });
+    }
   }
 
   if (method === 'ping') {
@@ -312,36 +329,51 @@ function handleMessage(msg) {
 
 // --- stdio transport ---
 
-let buffer = '';
+function startStdioServer() {
+  let buffer = '';
 
-process.stdin.setEncoding('utf8');
+  process.stdin.setEncoding('utf8');
 
-process.stdin.on('data', (chunk) => {
-  buffer += chunk;
-  const lines = buffer.split('\n');
+  process.stdin.on('data', (chunk) => {
+    buffer += chunk;
+    const lines = buffer.split('\n');
 
-  buffer = lines.pop();
+    buffer = lines.pop();
 
-  for (const line of lines) {
-    if (!line.trim()) {
-      continue;
-    }
-
-    try {
-      const msg = JSON.parse(line);
-      const response = handleMessage(msg);
-
-      if (response !== null) {
-        process.stdout.write(response + '\n');
+    for (const line of lines) {
+      if (!line.trim()) {
+        continue;
       }
-    } catch (err) {
-      process.stderr.write(`Parse error: ${err.message}\n`);
+
+      try {
+        const msg = JSON.parse(line);
+        const response = handleMessage(msg);
+
+        if (response !== null) {
+          process.stdout.write(response + '\n');
+        }
+      } catch (err) {
+        process.stderr.write(`Parse error: ${err.message}\n`);
+      }
     }
-  }
-});
+  });
 
-process.stdin.on('end', () => {
-  process.exit(0);
-});
+  process.stdin.on('end', () => {
+    process.exit(0);
+  });
 
-process.stderr.write(`${SERVER_INFO.name} v${SERVER_INFO.version} running on stdio\n`);
+  process.stderr.write(`${SERVER_INFO.name} v${SERVER_INFO.version} running on stdio\n`);
+}
+
+// Only boot the stdio server when run directly; `require()` (tests) gets the
+// pure helpers without attaching stdin listeners or printing the banner.
+if (require.main === module) {
+  startStdioServer();
+}
+
+module.exports = {
+  resolveDataDir,
+  readDiskTimeline,
+  handleGetTimeline,
+  handleMessage
+};

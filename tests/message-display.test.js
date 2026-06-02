@@ -50,6 +50,13 @@ test('emits nothing when disabled via off/false/no', () => {
   }
 });
 
+test('emits bare delta (no [null] prefix) when the clock cannot be derived', () => {
+  const out = run({ index: 0, delta: 'Hello' }, { CLAUDE_TIMING_NOW_ISO: 'not-an-iso' });
+  const parsed = JSON.parse(out);
+
+  assert.equal(parsed.hookSpecificOutput.displayContent, 'Hello');
+});
+
 test('fail-soft on malformed stdin — exit 0, no output (original preserved)', () => {
   // execFileSync throws if the process exits non-zero; this asserts exit 0.
   const out = run('not json at all');
