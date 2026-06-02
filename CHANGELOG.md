@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-06-03
+
+### Added
+- **Visible per-message timestamp** — a new `MessageDisplay` hook (`scripts/message-display.js`) prepends a local-time `[HH:MM:SS]` marker to each assistant message on screen. Display-only: it never alters the transcript or what Claude sees. Requires Claude Code 2.1.152+ (older versions simply never fire the hook). Adapted from `zoharbabin/claude-code-message-timestamps` (MIT) — see `THIRD-PARTY-LICENSES.md`.
+- **Per-surface toggles** — `src/config.js` adds `CLAUDE_TIMING_PASSIVE`, `CLAUDE_TIMING_IDLE_NOTE`, `CLAUDE_TIMING_MESSAGE_DISPLAY`, and `CLAUDE_TIMING_TIMELINE`. Each surface is on by default and disabled only by an explicit falsy value (`0`/`false`/`off`/`no`). Hooks stay fail-soft.
+- **`/idle-time-config` slash command** — reports each surface's effective on/off state and prints a paste-ready `settings.json` snippet to toggle them.
+
+### Changed
+- **Unified timeline** — the MCP `get_timeline` tool now merges the in-memory marked events (`mark_event`) with the auto-logged PostToolUse disk timeline, in chronological order with inter-event durations. The auto-logged tool history was previously a write-only dead-end that no tool could read. `get_timeline` accepts an optional `session_id` (defaults to the most recent session). Output entries now carry a `kind` (`mark` | `tool`) field.
+
 ## [0.3.1] - 2026-05-03
 
 ### Fixed

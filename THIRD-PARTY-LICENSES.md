@@ -1,8 +1,8 @@
 # Third-Party Licenses
 
 This plugin's own code is dual-licensed under the Unlicense and CC0 1.0
-Universal (see [`LICENSE`](./LICENSE)). One component is derived from
-third-party code and remains under its original license, reproduced in full
+Universal (see [`LICENSE`](./LICENSE)). Some components are derived from
+third-party code and remain under their original licenses, reproduced in full
 below.
 
 ## `scripts/parse-transcript.py` — retrospective `/timestamps` mode
@@ -15,6 +15,38 @@ licensed under the MIT License:
 MIT License
 
 Copyright (c) 2026 s-a-s-k-i-a
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+## `scripts/message-display.js` — visible per-message timestamp mode
+
+The `MessageDisplay` timestamp approach (the hook event, the `index`/`delta`
+contract, and the `[HH:MM:SS]` marker prepended to the first batch of each
+assistant message) is adapted from
+**[zoharbabin/claude-code-message-timestamps](https://github.com/zoharbabin/claude-code-message-timestamps)**,
+licensed under the MIT License:
+
+```
+MIT License
+
+Copyright (c) 2026 Zohar Babin
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

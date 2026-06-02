@@ -43,6 +43,17 @@
           }
         ]
       }
+    ],
+    "MessageDisplay": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/message-display.js",
+            "timeout": 10
+          }
+        ]
+      }
     ]
   }
 }

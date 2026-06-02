@@ -3,6 +3,7 @@
 const { formatIdleSystemMessage, formatTimingBlock } = require('../src/format');
 const { loadSessionState, saveSessionState } = require('../src/state');
 const { getNowIso, diffMs } = require('../src/time');
+const { isEnabled } = require('../src/config');
 
 async function readStdin() {
   let input = '';
@@ -42,22 +43,29 @@ async function main() {
     }
   });
 
+  // State is persisted unconditionally above — it underpins every surface
+  // (idle note, statusline, MCP). Toggles gate only the *emitted* output.
   const idleSinceLastStopMs = diffMs(userMessageTime, session.lastStopAt);
-  const additionalContext = formatTimingBlock({
-    userMessageTime,
-    idleSinceLastStopMs,
-    lastTurnExecMs: session.lastTurnExecMs
-  });
   const hookOutput = {
     hookSpecificOutput: {
-      hookEventName: 'UserPromptSubmit',
-      additionalContext
+      hookEventName: 'UserPromptSubmit'
     }
   };
-  const systemMessage = formatIdleSystemMessage(idleSinceLastStopMs);
 
-  if (systemMessage) {
-    hookOutput.systemMessage = systemMessage;
+  if (isEnabled('passive')) {
+    hookOutput.hookSpecificOutput.additionalContext = formatTimingBlock({
+      userMessageTime,
+      idleSinceLastStopMs,
+      lastTurnExecMs: session.lastTurnExecMs
+    });
+  }
+
+  if (isEnabled('idleNote')) {
+    const systemMessage = formatIdleSystemMessage(idleSinceLastStopMs);
+
+    if (systemMessage) {
+      hookOutput.systemMessage = systemMessage;
+    }
   }
 
   process.stdout.write(JSON.stringify(hookOutput));

@@ -122,3 +122,37 @@ test('/idle-time-setup slash command is registered', () => {
   assert.match(contents, /statusline-fragment\.js/);
   assert.match(contents, /refreshInterval/);
 });
+
+test('hook config registers MessageDisplay handler for the visible timestamp', () => {
+  const hooksPath = path.join(rootDir, 'hooks', 'hooks.json');
+  const messageDisplayScriptPath = path.join(rootDir, 'scripts', 'message-display.js');
+
+  assert.ok(fs.existsSync(messageDisplayScriptPath), 'expected MessageDisplay hook script to exist');
+
+  const config = JSON.parse(fs.readFileSync(hooksPath, 'utf8'));
+  const messageDisplayHook = config.hooks.MessageDisplay[0].hooks[0];
+
+  assert.equal(messageDisplayHook.type, 'command');
+  assert.equal(
+    messageDisplayHook.command,
+    'node ${CLAUDE_PLUGIN_ROOT}/scripts/message-display.js'
+  );
+});
+
+test('/idle-time-config slash command is registered', () => {
+  const commandPath = path.join(rootDir, 'commands', 'idle-time-config.md');
+  assert.ok(fs.existsSync(commandPath), 'expected slash command to exist');
+
+  const contents = fs.readFileSync(commandPath, 'utf8');
+  assert.match(contents, /^---/, 'expected frontmatter');
+  assert.match(contents, /description:/);
+  assert.match(contents, /CLAUDE_TIMING_MESSAGE_DISPLAY/);
+});
+
+test('config module exposes the four surface toggles', () => {
+  const { SURFACES } = require(path.join(rootDir, 'src', 'config.js'));
+  assert.deepEqual(
+    Object.keys(SURFACES).sort(),
+    ['idleNote', 'messageDisplay', 'passive', 'timeline']
+  );
+});

@@ -27,6 +27,11 @@ function stripMs(iso) {
   return iso.replace(/\.\d+(?=Z$|[+-]\d{2}:\d{2}$)/, '');
 }
 
+function clockFromIso(iso) {
+  const match = /T(\d{2}:\d{2}:\d{2})/.exec(String(iso));
+  return match ? match[1] : null;
+}
+
 function diffMs(laterIso, earlierIso) {
   if (!laterIso || !earlierIso) {
     return null;
@@ -47,5 +52,6 @@ module.exports = {
   toLocalIso,
   getNowIso,
   stripMs,
+  clockFromIso,
   diffMs
 };

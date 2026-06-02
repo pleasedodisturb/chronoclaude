@@ -12,14 +12,15 @@ function parseHookOutput(stdout) {
   return JSON.parse(stdout);
 }
 
-function runUserPromptSubmit({ input, dataDir, nowIso }) {
+function runUserPromptSubmit({ input, dataDir, nowIso, extraEnv = {} }) {
   return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, [scriptPath], {
       cwd: rootDir,
       env: {
         ...process.env,
         CLAUDE_PLUGIN_DATA: dataDir,
-        CLAUDE_TIMING_NOW_ISO: nowIso
+        CLAUDE_TIMING_NOW_ISO: nowIso,
+        ...extraEnv
       },
       stdio: ['pipe', 'pipe', 'pipe']
     });
@@ -161,6 +162,72 @@ test('idle gaps over one minute are shown to the user without adding the note to
         '[/timing]'
       ].join('\n')
     }
+  });
+});
+
+test('CLAUDE_TIMING_PASSIVE=0 omits additionalContext but still persists state', async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-user-prompt-'));
+  const nowIso = '2026-04-13T05:00:00.000+10:00';
+
+  const result = await runUserPromptSubmit({
+    input: { session_id: 'session-1' },
+    dataDir,
+    nowIso,
+    extraEnv: { CLAUDE_TIMING_PASSIVE: '0' }
+  });
+
+  assert.equal(result.code, 0, `expected success, stderr was: ${result.stderr}`);
+  assert.deepEqual(parseHookOutput(result.stdout), {
+    hookSpecificOutput: { hookEventName: 'UserPromptSubmit' }
+  });
+
+  // State is still written — it underpins idle/statusline regardless of toggle.
+  const statePath = path.join(dataDir, 'sessions', 'session-1.json');
+  assert.equal(fs.existsSync(statePath), true);
+  assert.equal(JSON.parse(fs.readFileSync(statePath, 'utf8')).lastUserPromptAt, nowIso);
+});
+
+test('CLAUDE_TIMING_IDLE_NOTE=0 suppresses the idle systemMessage but keeps the passive block', async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-user-prompt-'));
+  const nowIso = '2026-04-13T05:05:06.000+10:00';
+
+  fs.mkdirSync(path.join(dataDir, 'sessions'), { recursive: true });
+  fs.writeFileSync(
+    path.join(dataDir, 'sessions', 'session-1.json'),
+    JSON.stringify({
+      sessionId: 'session-1',
+      lastStopAt: '2026-04-13T05:00:04.000+10:00',
+      lastTurnExecMs: 4321,
+      lastUserPromptAt: '2026-04-13T04:59:00.000+10:00'
+    })
+  );
+
+  const result = await runUserPromptSubmit({
+    input: { session_id: 'session-1' },
+    dataDir,
+    nowIso,
+    extraEnv: { CLAUDE_TIMING_IDLE_NOTE: '0' }
+  });
+
+  assert.equal(result.code, 0, `expected success, stderr was: ${result.stderr}`);
+  const output = parseHookOutput(result.stdout);
+  assert.equal(output.systemMessage, undefined, 'idle note should be suppressed');
+  assert.match(output.hookSpecificOutput.additionalContext, /idle_for=302\.0s/);
+});
+
+test('both passive and idle-note disabled yields a bare envelope', async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-user-prompt-'));
+
+  const result = await runUserPromptSubmit({
+    input: { session_id: 'session-1' },
+    dataDir,
+    nowIso: '2026-04-13T05:00:00.000+10:00',
+    extraEnv: { CLAUDE_TIMING_PASSIVE: 'off', CLAUDE_TIMING_IDLE_NOTE: 'off' }
+  });
+
+  assert.equal(result.code, 0);
+  assert.deepEqual(parseHookOutput(result.stdout), {
+    hookSpecificOutput: { hookEventName: 'UserPromptSubmit' }
   });
 });
 
