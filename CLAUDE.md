@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+This file does not restate global rules — read `~/.claude/CLAUDE.md` first.
+
 ## Commands
 
 - `npm test` — runs `node --test tests/*.test.js` (82 tests, ~1s).
