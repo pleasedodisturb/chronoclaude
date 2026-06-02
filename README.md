@@ -112,3 +112,7 @@ bun run tokens
 - The timing block is added as hidden hook context, not visible prompt text.
 - The over-one-minute idle note is emitted as a hook `systemMessage` so it is visible to the user without being added to the plugin's `additionalContext`.
 - In v1, idle time is measured from the previous `Stop` hook timestamp.
+
+## License & attribution
+
+This plugin's own code is dual-licensed under the Unlicense and CC0 1.0 Universal (see `LICENSE`). The retrospective `/timestamps` mode (`scripts/parse-transcript.py`) is adapted from [s-a-s-k-i-a/claude-code-timestamps](https://github.com/s-a-s-k-i-a/claude-code-timestamps) (MIT) — its license is reproduced in [`THIRD-PARTY-LICENSES.md`](./THIRD-PARTY-LICENSES.md).
