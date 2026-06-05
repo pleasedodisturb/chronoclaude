@@ -14,7 +14,7 @@ Give Claude Code — and yourself — a sense of wall-clock time: a visible `[HH
 
 | Surface | What you get | Visible? | Toggle (default on) |
 |---|---|---|---|
-| Visible message timestamp | `[HH:MM:SS]` prepended to each assistant message (needs Claude Code 2.1.152+) | visible, always | `CLAUDE_TIMING_MESSAGE_DISPLAY` |
+| Visible message timestamp | grey `[HH:MM:SS]` prepended to each assistant message (needs Claude Code 2.1.152+) | visible, always | `CLAUDE_TIMING_MESSAGE_DISPLAY` |
 | Passive timing block | hidden `[timing]` block (`time`, `idle_for`, `last_turn`) Claude reads each prompt | hidden | `CLAUDE_TIMING_PASSIVE` |
 | Idle note | `[after 5m 2s]` when you return after >10s idle | visible, on idle | `CLAUDE_TIMING_IDLE_NOTE` |
 | Tool timeline | auto-logs tool calls; queryable via the MCP `get_timeline` tool | hidden (disk) | `CLAUDE_TIMING_TIMELINE` |
@@ -23,6 +23,8 @@ Give Claude Code — and yourself — a sense of wall-clock time: a visible `[HH
 | Statusline fragment | live elapsed-since-last-reply timer | visible | opt-in (see below) |
 
 Toggle any surface from the `env` block of `~/.claude/settings.json`, or run `/idle-time-config` to see the current state and get a paste-ready snippet. A surface is on unless its variable is set to a falsy value (`0`/`false`/`off`/`no`).
+
+The visible message timestamp is grey by default. Recolour it with `CLAUDE_TIMING_MESSAGE_DISPLAY_COLOR` — a named colour (`grey`, `dim`, `cyan`, …), a raw SGR sequence (`1;90`), or `none` to disable colour. Only the `[HH:MM:SS]` marker is coloured; your message text is never touched.
 
 The hidden timing block looks like this — Claude reads it, you never see it in your transcript:
 
@@ -87,6 +89,8 @@ Flags:
 - `--session-id <id>` — explicit session id; overrides stdin.
 - `--model-id <id>` — explicit model id; overrides stdin.
 - `--drop-seconds-after <seconds>` — switch to minute-only formatting at this threshold (default `900`, i.e. 15 minutes).
+- `--clock` — also print the current local time (`HH:MM`). Renders even when there's no elapsed time yet, so the plugin can own your statusline clock instead of a separate `date` call.
+- `--clock-position before|after` — place the clock before (default) or after the elapsed timer when both are shown, e.g. `14:05 3m 21s` vs `3m 21s 14:05`.
 
 ## Local Usage
 

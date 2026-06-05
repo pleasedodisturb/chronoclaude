@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-06-05
+
+### Added
+- **Coloured message timestamp** — the visible `[HH:MM:SS]` marker is now rendered in grey by default (`\x1b[90m`), so it stays subtle against the assistant's text. Configurable via `CLAUDE_TIMING_MESSAGE_DISPLAY_COLOR` (named colour like `grey`/`cyan`/`dim`, a raw SGR sequence like `1;90`, or `none` to disable colour). Only the marker is coloured — the message text is never recoloured.
+- **Statusline clock** — `scripts/statusline-fragment.js` accepts `--clock` to print the current local time (`HH:MM`), combinable with the elapsed timer and positioned via `--clock-position before|after` (default `before`). The clock renders even when no session/elapsed is available, so the plugin can own the statusline clock you'd otherwise hand-roll with `date`.
+
 ## [0.4.0] - 2026-06-03
 
 ### Added

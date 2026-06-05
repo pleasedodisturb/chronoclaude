@@ -27,7 +27,7 @@
 'use strict';
 
 const { getNowIso, clockFromIso } = require('../src/time');
-const { isEnabled } = require('../src/config');
+const { isEnabled, messageDisplayColorCode } = require('../src/config');
 
 async function readStdin() {
   let input = '';
@@ -48,7 +48,18 @@ async function main() {
   const hookInput = JSON.parse(rawInput || '{}');
   const delta = typeof hookInput.delta === 'string' ? hookInput.delta : '';
   const clock = hookInput.index === 0 ? clockFromIso(getNowIso()) : null;
-  const displayContent = clock ? `[${clock}] ${delta}` : delta;
+
+  let displayContent;
+
+  if (clock) {
+    // Colour ONLY the marker; reset before the delta so the assistant's text
+    // is never recoloured and no SGR code bleeds past the timestamp.
+    const code = messageDisplayColorCode();
+    const marker = code ? `[${code}m[${clock}][0m` : `[${clock}]`;
+    displayContent = `${marker} ${delta}`;
+  } else {
+    displayContent = delta;
+  }
 
   process.stdout.write(
     JSON.stringify({

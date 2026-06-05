@@ -29,6 +29,8 @@ Steps:
 
     Substitute the actual installed plugin path (e.g. `/home/<user>/src/claude-inject-idle-time` for local installs, or the path under `~/.claude/plugins/` for marketplace installs).
 
+    To also show the current local time from the plugin (instead of a separate `date` call), add `--clock` to the fragment invocation (and optionally `--clock-position after`). The clock renders even before any elapsed time exists, so you can drop a hand-rolled `date '+%H:%M'` line and let the plugin own it.
+
     If the script does not use a `parts` bash array, show a variant that appends directly to the output string instead:
 
     ```bash

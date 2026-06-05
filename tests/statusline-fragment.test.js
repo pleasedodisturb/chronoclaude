@@ -326,6 +326,83 @@ test('fragment --model-id flag overrides stdin model', async () => {
   assert.equal(result.stdout, '---');
 });
 
+test('fragment --clock prepends current HH:MM before the elapsed timer', async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-fragment-'));
+  seedSessionState(dataDir, 'clock-1', { lastStopAt: '2026-04-12T19:00:00.000Z' });
+
+  const result = await runFragment({
+    input: JSON.stringify({ session_id: 'clock-1' }),
+    args: ['--clock'],
+    dataDir,
+    nowIso: '2026-04-12T19:00:45.000Z'
+  });
+
+  assert.equal(result.code, 0, `stderr: ${result.stderr}`);
+  assert.equal(result.stdout, '19:00 45s');
+});
+
+test('fragment --clock-position after puts the clock after the elapsed timer', async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-fragment-'));
+  seedSessionState(dataDir, 'clock-2', { lastStopAt: '2026-04-12T19:00:00.000Z' });
+
+  const result = await runFragment({
+    input: JSON.stringify({ session_id: 'clock-2' }),
+    args: ['--clock', '--clock-position', 'after'],
+    dataDir,
+    nowIso: '2026-04-12T19:00:45.000Z'
+  });
+
+  assert.equal(result.code, 0, `stderr: ${result.stderr}`);
+  assert.equal(result.stdout, '45s 19:00');
+});
+
+test('fragment --clock renders the clock even with no session / data dir (elapsed empty)', async () => {
+  const result = await runFragment({
+    input: '',
+    args: ['--clock'],
+    dataDir: undefined,
+    nowIso: '2026-04-12T19:00:45.000Z',
+    extraEnv: { CLAUDE_PLUGIN_DATA: '' }
+  });
+
+  assert.equal(result.code, 0, `stderr: ${result.stderr}`);
+  assert.equal(result.stdout, '19:00');
+});
+
+test('fragment --clock renders alongside --- on a model change', async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-fragment-'));
+  const stopAt = '2026-04-12T19:00:00.000Z';
+  seedSessionState(dataDir, 'clock-3', {
+    lastStopAt: stopAt,
+    modelAtLastStop: 'claude-sonnet-4-6',
+    modelAtLastStopAt: stopAt
+  });
+
+  const result = await runFragment({
+    input: JSON.stringify({ session_id: 'clock-3', model: { id: 'claude-opus-4-7' } }),
+    args: ['--clock'],
+    dataDir,
+    nowIso: '2026-04-12T19:00:30.000Z'
+  });
+
+  assert.equal(result.code, 0, `stderr: ${result.stderr}`);
+  assert.equal(result.stdout, '19:00 ---');
+});
+
+test('fragment without --clock is unchanged (elapsed only)', async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-fragment-'));
+  seedSessionState(dataDir, 'clock-off', { lastStopAt: '2026-04-12T19:00:00.000Z' });
+
+  const result = await runFragment({
+    input: JSON.stringify({ session_id: 'clock-off' }),
+    dataDir,
+    nowIso: '2026-04-12T19:00:45.000Z'
+  });
+
+  assert.equal(result.code, 0, `stderr: ${result.stderr}`);
+  assert.equal(result.stdout, '45s');
+});
+
 test('fragment ignores model tracking when no model id is available', async () => {
   const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-fragment-'));
   const sessionId = 'session-no-model';
