@@ -1,23 +1,23 @@
 {
-  "name": "idle-info",
+  "name": "chronoclaude",
   "owner": {
-    "name": "clankercode",
-    "url": "https://github.com/clankercode"
+    "name": "pleasedodisturb",
+    "url": "https://github.com/pleasedodisturb"
   },
   "metadata": {
-    "name": "Idle Info",
-    "description": "Plugins by clankercode — idle timing context for Claude Code."
+    "name": "ChronoClaude",
+    "description": "Time awareness for Claude Code — visible timestamps, hidden timing context, an MCP time server, and a session timeline."
   },
   "plugins": [
     {
-      "name": "idle-timing",
+      "name": "chronoclaude",
       "source": "./",
-      "version": "0.4.1",
+      "version": "0.5.0",
       "description": "Time awareness for Claude Code: visible per-message timestamps, hidden timing context, idle notes, an MCP time server, and a /timestamps timeline — every surface toggleable.",
-      "homepage": "https://github.com/clankercode/claude-inject-idle-time",
-      "repository": "https://github.com/clankercode/claude-inject-idle-time",
+      "homepage": "https://github.com/pleasedodisturb/chronoclaude",
+      "repository": "https://github.com/pleasedodisturb/chronoclaude",
       "license": "Unlicense OR CC0-1.0",
-      "keywords": ["timing", "idle", "context", "hooks", "userpromptsubmit", "messagedisplay", "timestamps", "mcp", "temporal-awareness"]
+      "keywords": ["timing", "idle", "context", "hooks", "userpromptsubmit", "messagedisplay", "timestamps", "mcp", "temporal-awareness", "chrono"]
     }
   ]
 }

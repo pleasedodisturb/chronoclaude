@@ -63,8 +63,8 @@ jobs:
             cat "$notes_file"
             printf '\n## Install\n\n'
             printf '```text\n'
-            printf '/plugin marketplace add clankercode/claude-inject-idle-time\n'
-            printf '/plugin install idle-timing@idle-info\n'
+            printf '/plugin marketplace add pleasedodisturb/chronoclaude\n'
+            printf '/plugin install chronoclaude@chronoclaude\n'
             printf '```\n'
           } > "${notes_file}.final"
 

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-06-05
+
+### Changed
+- **Renamed to ChronoClaude.** The plugin outgrew "idle timing" — it now covers visible per-message timestamps, hidden timing context, an MCP time server, a session timeline, and a statusline clock. Identity changes:
+  - Repo `claude-inject-idle-time` → `chronoclaude` (old URLs redirect).
+  - Plugin name `idle-timing` → `chronoclaude`; marketplace `idle-info` → `chronoclaude`; owner → `pleasedodisturb`. Install is now `/plugin marketplace add pleasedodisturb/chronoclaude` then `/plugin install chronoclaude@chronoclaude`.
+  - Slash commands `/idle-time-setup` → `/chronoclaude-setup`, `/idle-time-config` → `/chronoclaude-config` (`/timestamps` unchanged).
+  - Plugin data dir `idle-timing-idle-info` → `chronoclaude-chronoclaude`. **Existing session/timeline data is not migrated** (it's ephemeral); a fresh dir is used. Re-add the marketplace after upgrading.
+- **Unchanged on purpose:** the `CLAUDE_TIMING_*` env toggles keep their names so existing `settings.json` configs keep working. Upstream credits (clankercode / s-a-s-k-i-a / zoharbabin) are retained in the README and `THIRD-PARTY-LICENSES.md`.
+
 ## [0.4.1] - 2026-06-05
 
 ### Added

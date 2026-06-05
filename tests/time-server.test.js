@@ -16,7 +16,7 @@ test('resolveDataDir prefers CLAUDE_PLUGIN_DATA when set', () => {
 
 test('resolveDataDir falls back to the documented plugin data path', () => {
   const dir = resolveDataDir({});
-  assert.match(dir, /[/\\]\.claude[/\\]plugins[/\\]data[/\\]idle-timing-idle-info$/);
+  assert.match(dir, /[/\\]\.claude[/\\]plugins[/\\]data[/\\]chronoclaude-chronoclaude$/);
 });
 
 function startServer(options = {}) {

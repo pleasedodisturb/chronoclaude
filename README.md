@@ -1,6 +1,6 @@
-# Claude Code Idle Timing Plugin
+# ChronoClaude
 
-Give Claude Code — and yourself — a sense of wall-clock time: a visible `[HH:MM:SS]` on every message, a hidden timing block Claude can reason about, idle-gap notes, an MCP time server, and a retrospective `/timestamps` timeline. Every surface is independently toggleable.
+**Time awareness for Claude Code.** Give Claude — and yourself — a sense of wall-clock time: a visible `[HH:MM:SS]` on every message, a hidden timing block Claude can reason about, idle-gap notes, an MCP time server, and a retrospective `/timestamps` timeline. Every surface is independently toggleable.
 
 > **This plugin is a merge of three community plugins.** Claude Code has no native sense of time, so several people built complementary pieces of the answer. Rather than run three half-overlapping installs, this plugin stands on their shoulders and brings them together into one coherent, toggleable whole — with full attribution (see [`THIRD-PARTY-LICENSES.md`](./THIRD-PARTY-LICENSES.md)):
 >
@@ -22,7 +22,7 @@ Give Claude Code — and yourself — a sense of wall-clock time: a visible `[HH
 | `/timestamps` command | retrospective wall-clock timeline of the session transcript | on command | command |
 | Statusline fragment | live elapsed-since-last-reply timer | visible | opt-in (see below) |
 
-Toggle any surface from the `env` block of `~/.claude/settings.json`, or run `/idle-time-config` to see the current state and get a paste-ready snippet. A surface is on unless its variable is set to a falsy value (`0`/`false`/`off`/`no`).
+Toggle any surface from the `env` block of `~/.claude/settings.json`, or run `/chronoclaude-config` to see the current state and get a paste-ready snippet. A surface is on unless its variable is set to a falsy value (`0`/`false`/`off`/`no`).
 
 The visible message timestamp is grey by default. Recolour it with `CLAUDE_TIMING_MESSAGE_DISPLAY_COLOR` — a named colour (`grey`, `dim`, `cyan`, …), a raw SGR sequence (`1;90`), or `none` to disable colour. Only the `[HH:MM:SS]` marker is coloured; your message text is never touched.
 
@@ -51,8 +51,8 @@ On a fresh session, unavailable prior-turn fields are omitted. `Stop`/`PreCompac
 ## Install via Marketplace
 
 ```text
-/plugin marketplace add clankercode/claude-inject-idle-time
-/plugin install idle-timing@idle-info
+/plugin marketplace add pleasedodisturb/chronoclaude
+/plugin install chronoclaude@chronoclaude
 ```
 
 ## Statusline integration (optional)
@@ -62,7 +62,7 @@ This plugin ships a composable fragment that prints the elapsed time since the m
 Run the slash command for a guided paste-ready snippet tailored to your current statusline:
 
 ```text
-/idle-time-setup
+/chronoclaude-setup
 ```
 
 At a minimum you will need to:
@@ -76,7 +76,7 @@ At a minimum you will need to:
 2. In your statusline script, after you read stdin into a variable (e.g. `input=$(cat)`), pipe the full stdin JSON to the fragment so it can see the current `session_id` and `model.id`:
 
     ```bash
-    idle=$(echo "$input" | node "/path/to/idle-timing/scripts/statusline-fragment.js" 2>/dev/null || true)
+    idle=$(echo "$input" | node "/path/to/chronoclaude/scripts/statusline-fragment.js" 2>/dev/null || true)
     [ -n "$idle" ] && parts+=("$idle")
     ```
 

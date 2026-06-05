@@ -4,7 +4,7 @@
 
 ## What this is
 
-[`pleasedodisturb/claude-inject-idle-time`](https://github.com/pleasedodisturb/claude-inject-idle-time)
+[`pleasedodisturb/chronoclaude`](https://github.com/pleasedodisturb/chronoclaude)
 is a community Claude Code plugin that gives the model a sense of
 wall-clock time and user-idle gaps — something Claude Code does not
 expose natively today.
@@ -164,7 +164,7 @@ Not a duplicate of [#2410](https://github.com/gsd-build/get-shit-done/issues/241
 
 ### Repos
 
-- Combined plugin (this proposal): <https://github.com/pleasedodisturb/claude-inject-idle-time>
+- Combined plugin (this proposal): <https://github.com/pleasedodisturb/chronoclaude>
 - Source — passive injection: <https://github.com/clankercode/claude-inject-idle-time>
 - Source — retrospective transcript parsing (MIT): <https://github.com/s-a-s-k-i-a/claude-code-timestamps>
 - GSD: <https://github.com/gsd-build/get-shit-done>

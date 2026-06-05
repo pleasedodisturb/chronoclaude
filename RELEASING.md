@@ -53,15 +53,15 @@ automatically.
 ## Marketplace install command (for release notes / issue comments)
 
 ```text
-/plugin marketplace add clankercode/claude-inject-idle-time
-/plugin install idle-timing@idle-info
+/plugin marketplace add pleasedodisturb/chronoclaude
+/plugin install chronoclaude@chronoclaude
 ```
 
 ## Distribution targets
 
 After tagging, submit or update listings at:
 
-- **Self-hosted (already live):** `clankercode/claude-inject-idle-time` — no action needed after push
+- **Self-hosted (already live):** `pleasedodisturb/chronoclaude` — no action needed after push
 - **Community aggregators (open PRs):**
   - `ananddtyagi/cc-marketplace` — add/update entry in `.claude-plugin/marketplace.json`
   - `xiaolai/claude-plugin-marketplace` — add/update entry

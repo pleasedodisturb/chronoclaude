@@ -6,7 +6,7 @@ This file does not restate global rules — read `~/.claude/CLAUDE.md` first.
 
 ## Commands
 
-- `npm test` — runs `node --test tests/*.test.js` (82 tests, ~1s).
+- `npm test` — runs `node --test tests/*.test.js` (128 tests, ~1s).
 - `npm run check:version` — verifies `package.json`, `.claude-plugin/plugin.json`, and `.claude-plugin/marketplace.json` all carry the same version. CI gate before tagging.
 - `npm run prerelease` — `check:version` + full test suite. Run before any `git tag v*`.
 - `npm run tokens` (or `bun run tokens` if `bun` is available) — prints `gpt-tokenizer` BPE counts for representative `[timing]` payloads. Used as a proxy for Anthropic's tokenizer.
@@ -21,7 +21,7 @@ To run a single test, target the file directly: `node --test tests/state.test.js
 The plugin gives Claude Code a sense of wall-clock time and idle gaps. It ships **four modes** coordinated through a single per-session state file at `${CLAUDE_PLUGIN_DATA}/sessions/<sanitized-session-id>.json`:
 
 - **Passive** — `scripts/user-prompt-submit.js` injects a hidden `[timing]` block via the hook's `additionalContext`. Also emits a visible `systemMessage` (`[after 5m 2s]`) when idle exceeds 10s. (These two outputs are independently gated — see Toggle layer.)
-- **Active** — `servers/time-server.js` is an MCP server (`get_time`, `time_diff`, `mark_event`, `get_timeline`) registered via `.mcp.json`. Hand-rolled JSON-RPC 2.0 over stdio — zero runtime dependencies, no `@modelcontextprotocol/sdk`. `get_timeline` merges the in-memory `mark_event` log with the PostToolUse disk timeline (read via `resolveDataDir`, falling back to `$HOME/.claude/plugins/data/idle-timing-idle-info`; optional `session_id` arg, else most-recent file). Disk reads are wrapped so a failure never breaks the tool.
+- **Active** — `servers/time-server.js` is an MCP server (`get_time`, `time_diff`, `mark_event`, `get_timeline`) registered via `.mcp.json`. Hand-rolled JSON-RPC 2.0 over stdio — zero runtime dependencies, no `@modelcontextprotocol/sdk`. `get_timeline` merges the in-memory `mark_event` log with the PostToolUse disk timeline (read via `resolveDataDir`, falling back to `$HOME/.claude/plugins/data/chronoclaude-chronoclaude`; optional `session_id` arg, else most-recent file). Disk reads are wrapped so a failure never breaks the tool.
 - **Retrospective** — `commands/timestamps.md` is a slash command that shells out to `scripts/parse-transcript.py` to render a wall-clock timeline of the current session's `.jsonl` transcript.
 - **Visible** — `scripts/message-display.js` is a `MessageDisplay` hook that prepends a local-time `[HH:MM:SS]` marker to the first batch (`index === 0`) of each assistant message. Display-only — never alters the transcript or what Claude sees. Requires Claude Code 2.1.152+. Adapted from `zoharbabin/claude-code-message-timestamps` (MIT). The marker is wrapped in an SGR colour (default grey `\x1b[90m`, reset before the delta so the message text is never recoloured); `CLAUDE_TIMING_MESSAGE_DISPLAY_COLOR` overrides it (named colour, raw SGR, or `none`) via `messageDisplayColorCode` in `src/config.js`. `displayContent` renders ANSI per Claude Code docs.
 
@@ -29,7 +29,7 @@ Plus a statusline fragment (`scripts/statusline-fragment.js`) and a PostToolUse 
 
 ### Toggle layer
 
-`src/config.js` exposes `isEnabled(key, env)` and a `SURFACES` map. Each user-facing surface is gated by a `CLAUDE_TIMING_*` env var, **on by default**, disabled only by an explicit falsy value (`0`/`false`/`off`/`no`): `CLAUDE_TIMING_PASSIVE`, `CLAUDE_TIMING_IDLE_NOTE`, `CLAUDE_TIMING_MESSAGE_DISPLAY`, `CLAUDE_TIMING_TIMELINE`. Toggles gate only emitted **output** — `Stop`/`PreCompact` and state writes always run so the shared state stays coherent for whichever surfaces are on. The `/idle-time-config` command reports state and prints a paste-ready snippet.
+`src/config.js` exposes `isEnabled(key, env)` and a `SURFACES` map. Each user-facing surface is gated by a `CLAUDE_TIMING_*` env var, **on by default**, disabled only by an explicit falsy value (`0`/`false`/`off`/`no`): `CLAUDE_TIMING_PASSIVE`, `CLAUDE_TIMING_IDLE_NOTE`, `CLAUDE_TIMING_MESSAGE_DISPLAY`, `CLAUDE_TIMING_TIMELINE`. Toggles gate only emitted **output** — `Stop`/`PreCompact` and state writes always run so the shared state stays coherent for whichever surfaces are on. The `/chronoclaude-config` command reports state and prints a paste-ready snippet.
 
 ### Hook lifecycle
 
@@ -45,7 +45,7 @@ The state file's `lastStopAt` field is the load-bearing signal:
 
 **Hooks must fail-soft.** Every hook script ends with `main().catch(...) { process.exit(0); }` — never exit 1, even on error. A non-zero exit from `UserPromptSubmit` can be treated as a hook failure by Claude Code and **block the user's prompt**. Telemetry must never block the user. Stderr is fine for diagnosis; exit 0.
 
-**Statusline runs outside hook context.** `scripts/statusline-fragment.js` is invoked by the user's statusline shell script, not by a hook dispatcher — so `CLAUDE_PLUGIN_DATA` is **not** set. The fragment exits silently when the env var is missing — **except** the `--clock` output (`HH:MM`), which is computed from `getNowIso()` alone and renders even with no data dir/session/elapsed (composed via `--clock-position before|after`). Because statusline runs outside hook context, clock on/off and position are CLI flags (not `CLAUDE_TIMING_*` env toggles). Callers (the user's statusline script, e.g. `~/.claude/statusline-command.sh`) must set `CLAUDE_PLUGIN_DATA="$HOME/.claude/plugins/data/idle-timing-idle-info"` explicitly when invoking. The `/idle-time-setup` slash command prints the paste-ready snippet but does not auto-edit.
+**Statusline runs outside hook context.** `scripts/statusline-fragment.js` is invoked by the user's statusline shell script, not by a hook dispatcher — so `CLAUDE_PLUGIN_DATA` is **not** set. The fragment exits silently when the env var is missing — **except** the `--clock` output (`HH:MM`), which is computed from `getNowIso()` alone and renders even with no data dir/session/elapsed (composed via `--clock-position before|after`). Because statusline runs outside hook context, clock on/off and position are CLI flags (not `CLAUDE_TIMING_*` env toggles). Callers (the user's statusline script, e.g. `~/.claude/statusline-command.sh`) must set `CLAUDE_PLUGIN_DATA="$HOME/.claude/plugins/data/chronoclaude-chronoclaude"` explicitly when invoking. The `/chronoclaude-setup` slash command prints the paste-ready snippet but does not auto-edit.
 
 ### State file safety
 
@@ -67,4 +67,4 @@ The version string lives in three files and **must** stay in sync (enforced by `
 
 ## Marketplace integration notes
 
-This repo is a meta-plugin merging three upstreams: `clankercode/claude-inject-idle-time` (passive block + MCP server + statusline), the retrospective `/timestamps` work from `s-a-s-k-i-a/claude-code-timestamps` (MIT), and the visible per-message `[HH:MM:SS]` from `zoharbabin/claude-code-message-timestamps` (MIT). MIT-derived components are credited in `THIRD-PARTY-LICENSES.md`. The user-facing install path uses the upstream marketplace (`clankercode/claude-inject-idle-time`); this repo is the development home and the source for the GSD integration proposal at `docs/proposals/gsd-integration.md`.
+This repo is a meta-plugin merging three upstreams: `clankercode/claude-inject-idle-time` (passive block + MCP server + statusline), the retrospective `/timestamps` work from `s-a-s-k-i-a/claude-code-timestamps` (MIT), and the visible per-message `[HH:MM:SS]` from `zoharbabin/claude-code-message-timestamps` (MIT). MIT-derived components are credited in `THIRD-PARTY-LICENSES.md`. The plugin is published from `pleasedodisturb/chronoclaude` (this repo): install via `/plugin marketplace add pleasedodisturb/chronoclaude` then `/plugin install chronoclaude@chronoclaude`. It was formerly distributed as `idle-timing` under `clankercode/claude-inject-idle-time` (now one of the upstreams it merges). GSD integration proposal: `docs/proposals/gsd-integration.md`.

@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>idle-timing — tell the model how long you've been gone</title>
+  <title>chronoclaude — time awareness for Claude Code</title>
   <meta name="description" content="Claude Code plugin that injects hidden timing context into every user prompt. 42 tokens. Local time, idle seconds, previous turn duration." />
-  <meta property="og:title" content="idle-timing" />
+  <meta property="og:title" content="chronoclaude" />
   <meta property="og:description" content="Hidden timing context for Claude Code. 42 tokens per prompt." />
-  <meta property="og:image" content="https://clankercode.github.io/claude-inject-idle-time/screenshots/hero.png" />
+  <meta property="og:image" content="https://pleasedodisturb.github.io/claude-inject-idle-time/screenshots/hero.png" />
   <meta property="og:type" content="website" />
   <meta name="theme-color" content="#1c1c28" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%231c1c28'/%3E%3Ctext x='50%25' y='56%25' font-family='IBM Plex Mono,monospace' font-size='42' font-weight='700' text-anchor='middle' dominant-baseline='middle' fill='%23e4b363'%3E%E2%8F%B1%3C/text%3E%3C/svg%3E" />
@@ -24,14 +24,14 @@
     <section class="hero">
       <header class="crown">
         <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
-        <span class="crown-title">~/claude-code/plugins/idle-timing</span>
-        <span class="crown-meta">v0.3.0</span>
+        <span class="crown-title">~/claude-code/plugins/chronoclaude</span>
+        <span class="crown-meta">v0.5.0</span>
       </header>
 
       <div class="hero-grid">
         <div class="hero-left">
           <div class="tag">[ plugin ]</div>
-          <h1>idle-timing</h1>
+          <h1>chronoclaude</h1>
           <p class="lede">Tell the model how long you've been gone.</p>
 
           <p class="blurb">
@@ -49,27 +49,27 @@
           </div>
 
           <div class="cli">
-            <div class="cli-row" data-copy="/plugin marketplace add clankercode/claude-inject-idle-time">
+            <div class="cli-row" data-copy="/plugin marketplace add pleasedodisturb/chronoclaude">
               <span class="prompt">&gt;</span>
-              <code>/plugin marketplace add clankercode/claude-inject-idle-time</code>
+              <code>/plugin marketplace add pleasedodisturb/chronoclaude</code>
               <button class="copy" aria-label="Copy">copy</button>
             </div>
-            <div class="cli-row" data-copy="/plugin install idle-timing@idle-info">
+            <div class="cli-row" data-copy="/plugin install chronoclaude@chronoclaude">
               <span class="prompt">&gt;</span>
-              <code>/plugin install idle-timing@idle-info</code>
+              <code>/plugin install chronoclaude@chronoclaude</code>
               <button class="copy" aria-label="Copy">copy</button>
             </div>
           </div>
 
           <div class="links">
-            <a href="https://github.com/clankercode/claude-inject-idle-time" class="lnk">&rarr; github</a>
-            <a href="https://github.com/clankercode/claude-inject-idle-time/releases" class="lnk">&rarr; releases</a>
-            <a href="https://github.com/clankercode/claude-inject-idle-time/blob/master/CHANGELOG.md" class="lnk">&rarr; changelog</a>
+            <a href="https://github.com/pleasedodisturb/chronoclaude" class="lnk">&rarr; github</a>
+            <a href="https://github.com/pleasedodisturb/chronoclaude/releases" class="lnk">&rarr; releases</a>
+            <a href="https://github.com/pleasedodisturb/chronoclaude/blob/master/CHANGELOG.md" class="lnk">&rarr; changelog</a>
           </div>
         </div>
 
         <figure class="hero-right">
-          <img src="screenshots/hero.png" alt="Claude Code session showing the idle-timing statusline counter and an '[after 5m 2s]' note after returning from idle" />
+          <img src="screenshots/hero.png" alt="Claude Code session showing the chronoclaude statusline counter and an '[after 5m 2s]' note after returning from idle" />
           <figcaption>
             <span class="fc-mark">&mdash;</span>
             live statusline counter + visible idle note on return
@@ -163,9 +163,9 @@ okay where were we?</pre>
           Drop into your existing statusline script &mdash; it doesn't replace one.
         </p>
         <div class="cli">
-          <div class="cli-row" data-copy="/idle-time-setup">
+          <div class="cli-row" data-copy="/chronoclaude-setup">
             <span class="prompt">&gt;</span>
-            <code>/idle-time-setup</code>
+            <code>/chronoclaude-setup</code>
             <button class="copy" aria-label="Copy">copy</button>
           </div>
         </div>
@@ -176,12 +176,12 @@ okay where were we?</pre>
     <footer class="foot">
       <div class="foot-left">
         <div class="tag">[ meta ]</div>
-        <div class="foot-line">clankercode / idle-timing &middot; v0.3.0 &middot; Unlicense OR CC0-1.0</div>
+        <div class="foot-line">pleasedodisturb / chronoclaude &middot; v0.5.0 &middot; Unlicense OR CC0-1.0</div>
         <div class="foot-sub">no telemetry &middot; no network calls &middot; ~200 lines of node</div>
       </div>
       <div class="foot-right">
-        <a href="https://github.com/clankercode/claude-inject-idle-time/issues">report an issue &rarr;</a>
-        <a href="https://github.com/clankercode/claude-inject-idle-time/blob/master/LICENSE">license &rarr;</a>
+        <a href="https://github.com/pleasedodisturb/chronoclaude/issues">report an issue &rarr;</a>
+        <a href="https://github.com/pleasedodisturb/chronoclaude/blob/master/LICENSE">license &rarr;</a>
         <a href="privacy.html">privacy &rarr;</a>
       </div>
     </footer>

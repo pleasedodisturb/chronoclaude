@@ -11,7 +11,7 @@ test('plugin manifest describes the idle timing plugin', () => {
   assert.ok(fs.existsSync(manifestPath), 'expected plugin manifest to exist');
 
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-  assert.equal(manifest.name, 'idle-timing');
+  assert.equal(manifest.name, 'chronoclaude');
   assert.match(manifest.description, /timing context/i);
   assert.equal(typeof manifest.version, 'string');
   assert.notEqual(manifest.version, '');
@@ -54,11 +54,11 @@ test('repo can act as a local marketplace for installing this plugin', () => {
   assert.ok(fs.existsSync(marketplacePath), 'expected marketplace manifest to exist');
 
   const marketplace = JSON.parse(fs.readFileSync(marketplacePath, 'utf8'));
-  assert.equal(marketplace.name, 'idle-info');
-  assert.equal(marketplace.owner.name, 'clankercode');
+  assert.equal(marketplace.name, 'chronoclaude');
+  assert.equal(marketplace.owner.name, 'pleasedodisturb');
   assert.ok(marketplace.plugins.length >= 1, 'expected at least one plugin entry');
   const entry = marketplace.plugins[0];
-  assert.equal(entry.name, 'idle-timing');
+  assert.equal(entry.name, 'chronoclaude');
   assert.equal(entry.source, './');
 });
 
@@ -112,8 +112,8 @@ test('/timestamps slash command is registered', () => {
   assert.ok(fs.existsSync(scriptPath), 'expected parser script to exist');
 });
 
-test('/idle-time-setup slash command is registered', () => {
-  const commandPath = path.join(rootDir, 'commands', 'idle-time-setup.md');
+test('/chronoclaude-setup slash command is registered', () => {
+  const commandPath = path.join(rootDir, 'commands', 'chronoclaude-setup.md');
   assert.ok(fs.existsSync(commandPath), 'expected slash command to exist');
 
   const contents = fs.readFileSync(commandPath, 'utf8');
@@ -139,8 +139,8 @@ test('hook config registers MessageDisplay handler for the visible timestamp', (
   );
 });
 
-test('/idle-time-config slash command is registered', () => {
-  const commandPath = path.join(rootDir, 'commands', 'idle-time-config.md');
+test('/chronoclaude-config slash command is registered', () => {
+  const commandPath = path.join(rootDir, 'commands', 'chronoclaude-config.md');
   assert.ok(fs.existsSync(commandPath), 'expected slash command to exist');
 
   const contents = fs.readFileSync(commandPath, 'utf8');

@@ -19,7 +19,7 @@ const { getNowIso, diffMs, toLocalIso } = require('../src/time');
 const { formatElapsed } = require('../src/duration');
 const { sanitizeSessionId } = require('../src/state');
 
-const SERVER_INFO = { name: 'idle-timing-time-server', version: '0.4.0' };
+const SERVER_INFO = { name: 'idle-timing-time-server', version: '0.5.0' };
 const DROP_SECONDS_AFTER = 900;
 // Defensive cap on the disk timeline read: a normal session logs ~60 bytes per
 // tool call, so 10 MB (~170k calls) is far beyond any real session. Guards
@@ -43,7 +43,7 @@ function resolveDataDir(env = process.env) {
 
   // MCP servers may launch without CLAUDE_PLUGIN_DATA set; fall back to the
   // documented install path (see repo CLAUDE.md / statusline note).
-  return path.join(os.homedir(), '.claude', 'plugins', 'data', 'idle-timing-idle-info');
+  return path.join(os.homedir(), '.claude', 'plugins', 'data', 'chronoclaude-chronoclaude');
 }
 
 // Returns parsed `{timestamp, tool, event}` lines from the on-disk tool
