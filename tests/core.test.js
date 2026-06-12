@@ -112,7 +112,7 @@ test('formatIdleSystemMessage omits short or unavailable idle gaps', () => {
 });
 
 test('loadSessionState returns a default object when the session is new', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-core-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-core-'));
 
   const state = await loadSessionState({ dataDir, sessionId: 'session-1' });
 
@@ -120,7 +120,7 @@ test('loadSessionState returns a default object when the session is new', async 
 });
 
 test('getSessionFilePath keeps session files inside the sessions directory', () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-core-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-core-'));
   const filePath = getSessionFilePath(dataDir, '../session-1');
 
   assert.equal(path.dirname(filePath), path.join(dataDir, 'sessions'));
@@ -128,7 +128,7 @@ test('getSessionFilePath keeps session files inside the sessions directory', () 
 });
 
 test('saveSessionState persists a session record that can be loaded again', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-core-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-core-'));
 
   await saveSessionState({
     dataDir,
@@ -154,7 +154,7 @@ test('saveSessionState persists a session record that can be loaded again', asyn
 });
 
 test('loadSessionState recovers from a corrupt JSON file by quarantining it and returning fresh state', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-core-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-core-'));
   const filePath = getSessionFilePath(dataDir, 'session-1');
 
   fs.mkdirSync(path.dirname(filePath), { recursive: true });

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-06-12
+
+### Changed
+- **De-branded leftover `idle-timing` identifiers** missed by the v0.5.0 rename: the MCP server now self-identifies as `chronoclaude-time-server` (was `idle-timing-time-server`), the `/chronoclaude-setup` and `/chronoclaude-config` command docs and their paste-ready snippets now say chronoclaude (including the snippet marker comments and example paths), `parse-transcript.py`'s docstring, and test tmpdir prefixes. No functional changes; the `.mcp.json` server key and `CLAUDE_TIMING_*` env vars are unchanged. If you wired the statusline snippet with the old `# --- idle-timing fragment ---` markers, it keeps working — the markers are comments.
+
 ## [0.5.1] - 2026-06-12
 
 ### Changed

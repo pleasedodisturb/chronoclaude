@@ -22,7 +22,7 @@ function runHook(dataDir, sessionId, toolName) {
 }
 
 test('post-tool-use creates timeline JSONL on first call', () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-ptu-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-ptu-'));
 
   runHook(dataDir, 'session-1', 'Bash');
 
@@ -39,7 +39,7 @@ test('post-tool-use creates timeline JSONL on first call', () => {
 });
 
 test('post-tool-use appends multiple events to same session', () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-ptu-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-ptu-'));
 
   runHook(dataDir, 'session-2', 'Read');
   runHook(dataDir, 'session-2', 'Edit');
@@ -54,7 +54,7 @@ test('post-tool-use appends multiple events to same session', () => {
 });
 
 test('post-tool-use isolates sessions into separate files', () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-ptu-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-ptu-'));
 
   runHook(dataDir, 'session-a', 'Bash');
   runHook(dataDir, 'session-b', 'Read');
@@ -70,7 +70,7 @@ test('post-tool-use isolates sessions into separate files', () => {
 });
 
 test('post-tool-use sanitizes session IDs in filenames', () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-ptu-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-ptu-'));
 
   runHook(dataDir, '../evil-session', 'Bash');
 
@@ -79,7 +79,7 @@ test('post-tool-use sanitizes session IDs in filenames', () => {
 });
 
 test('post-tool-use writes nothing when CLAUDE_TIMING_TIMELINE is disabled', () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-ptu-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-ptu-'));
 
   execFileSync('node', [SCRIPT_PATH], {
     input: JSON.stringify({ session_id: 'session-off', tool_name: 'Bash' }),
@@ -100,7 +100,7 @@ test('post-tool-use writes nothing when CLAUDE_TIMING_TIMELINE is disabled', () 
 
 test('post-tool-use stays disabled across off/false/no toggle variants', () => {
   for (const value of ['off', 'false', 'no']) {
-    const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-ptu-'));
+    const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-ptu-'));
 
     execFileSync('node', [SCRIPT_PATH], {
       input: JSON.stringify({ session_id: 'session-off', tool_name: 'Bash' }),
@@ -117,7 +117,7 @@ test('post-tool-use stays disabled across off/false/no toggle variants', () => {
 });
 
 test('post-tool-use defaults tool name to unknown', () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-ptu-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-ptu-'));
   const input = JSON.stringify({ session_id: 'session-x' });
 
   execFileSync('node', [SCRIPT_PATH], {

@@ -1,9 +1,9 @@
 ---
-description: Show paste-ready snippet to wire the idle-timing fragment into your existing statusline
+description: Show paste-ready snippet to wire the chronoclaude fragment into your existing statusline
 allowed-tools: [Read, Bash]
 ---
 
-# Idle-time statusline setup
+# ChronoClaude statusline setup
 
 Goal: help the user add the `statusline-fragment` to their existing statusline script and enable periodic refresh.
 
@@ -21,23 +21,23 @@ Steps:
 4. Print the paste-ready snippet the user can drop into their statusline script. If the script already assigns stdin to a variable named `input`, use that name; otherwise suggest renaming. The fragment reads the full statusline JSON from stdin so it can see both `session_id` and `model.id` (used to blank the timer with `---` when the model changes). Place the snippet just before the final output assembly. Example snippet:
 
     ```bash
-    # --- idle-timing fragment ---
-    idle=$(echo "$input" | node "/path/to/idle-timing/scripts/statusline-fragment.js" 2>/dev/null || true)
+    # --- chronoclaude fragment ---
+    idle=$(echo "$input" | node "/path/to/chronoclaude/scripts/statusline-fragment.js" 2>/dev/null || true)
     [ -n "$idle" ] && parts+=("$idle")
-    # --- /idle-timing fragment ---
+    # --- /chronoclaude fragment ---
     ```
 
-    Substitute the actual installed plugin path (e.g. `/home/<user>/src/claude-inject-idle-time` for local installs, or the path under `~/.claude/plugins/` for marketplace installs).
+    Substitute the actual installed plugin path (e.g. `/home/<user>/src/chronoclaude` for local installs, or the path under `~/.claude/plugins/` for marketplace installs).
 
     To also show the current local time from the plugin (instead of a separate `date` call), add `--clock` to the fragment invocation (and optionally `--clock-position after`). The clock renders even before any elapsed time exists, so you can drop a hand-rolled `date '+%H:%M'` line and let the plugin own it.
 
     If the script does not use a `parts` bash array, show a variant that appends directly to the output string instead:
 
     ```bash
-    # --- idle-timing fragment ---
-    idle=$(echo "$input" | node "/path/to/idle-timing/scripts/statusline-fragment.js" 2>/dev/null || true)
+    # --- chronoclaude fragment ---
+    idle=$(echo "$input" | node "/path/to/chronoclaude/scripts/statusline-fragment.js" 2>/dev/null || true)
     [ -n "$idle" ] && result="$result | $idle"
-    # --- /idle-timing fragment ---
+    # --- /chronoclaude fragment ---
     ```
 
 5. Print the settings change to enable periodic refresh:

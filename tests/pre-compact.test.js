@@ -35,7 +35,7 @@ function runPreCompact({ input, dataDir, nowIso }) {
 }
 
 test('pre-compact resets lastStopAt to now and clears captured model', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-precompact-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-precompact-'));
   const nowIso = '2026-04-17T12:00:00.000Z';
 
   fs.mkdirSync(path.join(dataDir, 'sessions'), { recursive: true });
@@ -78,7 +78,7 @@ test('pre-compact resets lastStopAt to now and clears captured model', async () 
 });
 
 test('pre-compact creates session state when none exists', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-precompact-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-precompact-'));
   const nowIso = '2026-04-17T12:00:00.000Z';
 
   const result = await runPreCompact({
@@ -100,7 +100,7 @@ test('pre-compact creates session state when none exists', async () => {
 });
 
 test('pre-compact exits 0 fail-soft when session_id is missing', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-precompact-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-precompact-'));
 
   const result = await runPreCompact({
     input: {},

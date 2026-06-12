@@ -56,7 +56,7 @@ function seedSessionState(dataDir, sessionId, state) {
 }
 
 test('fragment prints elapsed time since lastStopAt from stdin session_id', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-fragment-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-fragment-'));
   const sessionId = 'session-1';
 
   seedSessionState(dataDir, sessionId, {
@@ -75,7 +75,7 @@ test('fragment prints elapsed time since lastStopAt from stdin session_id', asyn
 });
 
 test('fragment prints empty when session has no lastStopAt yet', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-fragment-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-fragment-'));
   const sessionId = 'session-1';
 
   seedSessionState(dataDir, sessionId, {
@@ -93,7 +93,7 @@ test('fragment prints empty when session has no lastStopAt yet', async () => {
 });
 
 test('fragment prints empty when no state file exists for the session', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-fragment-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-fragment-'));
 
   const result = await runFragment({
     input: JSON.stringify({ session_id: 'never-seen' }),
@@ -106,7 +106,7 @@ test('fragment prints empty when no state file exists for the session', async ()
 });
 
 test('fragment prints empty when stdin is not valid JSON and no --session-id', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-fragment-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-fragment-'));
 
   const result = await runFragment({
     input: 'not json',
@@ -119,7 +119,7 @@ test('fragment prints empty when stdin is not valid JSON and no --session-id', a
 });
 
 test('fragment uses --session-id when stdin is empty', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-fragment-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-fragment-'));
   const sessionId = 'session-2';
 
   seedSessionState(dataDir, sessionId, {
@@ -138,7 +138,7 @@ test('fragment uses --session-id when stdin is empty', async () => {
 });
 
 test('fragment --session-id overrides stdin session_id', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-fragment-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-fragment-'));
 
   seedSessionState(dataDir, 'from-arg', {
     lastStopAt: '2026-04-12T19:00:00.000Z'
@@ -159,7 +159,7 @@ test('fragment --session-id overrides stdin session_id', async () => {
 });
 
 test('fragment honors --drop-seconds-after flag', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-fragment-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-fragment-'));
   const sessionId = 'session-1';
 
   seedSessionState(dataDir, sessionId, {
@@ -195,7 +195,7 @@ test('fragment prints empty when CLAUDE_PLUGIN_DATA is not set', async () => {
 });
 
 test('fragment captures model on first tick after a stop', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-fragment-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-fragment-'));
   const sessionId = 'session-model-capture';
   const stopAt = '2026-04-12T19:00:00.000Z';
 
@@ -223,7 +223,7 @@ test('fragment captures model on first tick after a stop', async () => {
 });
 
 test('fragment prints --- when model changed since capture', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-fragment-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-fragment-'));
   const sessionId = 'session-model-changed';
   const stopAt = '2026-04-12T19:00:00.000Z';
 
@@ -247,7 +247,7 @@ test('fragment prints --- when model changed since capture', async () => {
 });
 
 test('fragment shows elapsed time when current model matches captured model', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-fragment-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-fragment-'));
   const sessionId = 'session-model-same';
   const stopAt = '2026-04-12T19:00:00.000Z';
 
@@ -271,7 +271,7 @@ test('fragment shows elapsed time when current model matches captured model', as
 });
 
 test('fragment re-captures model when a newer lastStopAt is seen', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-fragment-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-fragment-'));
   const sessionId = 'session-model-recapture';
   const newerStopAt = '2026-04-12T19:00:00.000Z';
   const olderStopAt = '2026-04-12T18:00:00.000Z';
@@ -302,7 +302,7 @@ test('fragment re-captures model when a newer lastStopAt is seen', async () => {
 });
 
 test('fragment --model-id flag overrides stdin model', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-fragment-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-fragment-'));
   const sessionId = 'session-model-flag';
   const stopAt = '2026-04-12T19:00:00.000Z';
 
@@ -327,7 +327,7 @@ test('fragment --model-id flag overrides stdin model', async () => {
 });
 
 test('fragment --clock prepends current HH:MM before the elapsed timer', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-fragment-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-fragment-'));
   seedSessionState(dataDir, 'clock-1', { lastStopAt: '2026-04-12T19:00:00.000Z' });
 
   const result = await runFragment({
@@ -342,7 +342,7 @@ test('fragment --clock prepends current HH:MM before the elapsed timer', async (
 });
 
 test('fragment --clock-position after puts the clock after the elapsed timer', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-fragment-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-fragment-'));
   seedSessionState(dataDir, 'clock-2', { lastStopAt: '2026-04-12T19:00:00.000Z' });
 
   const result = await runFragment({
@@ -370,7 +370,7 @@ test('fragment --clock renders the clock even with no session / data dir (elapse
 });
 
 test('fragment --clock renders alongside --- on a model change', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-fragment-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-fragment-'));
   const stopAt = '2026-04-12T19:00:00.000Z';
   seedSessionState(dataDir, 'clock-3', {
     lastStopAt: stopAt,
@@ -390,7 +390,7 @@ test('fragment --clock renders alongside --- on a model change', async () => {
 });
 
 test('fragment without --clock is unchanged (elapsed only)', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-fragment-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-fragment-'));
   seedSessionState(dataDir, 'clock-off', { lastStopAt: '2026-04-12T19:00:00.000Z' });
 
   const result = await runFragment({
@@ -404,7 +404,7 @@ test('fragment without --clock is unchanged (elapsed only)', async () => {
 });
 
 test('fragment ignores model tracking when no model id is available', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-fragment-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-fragment-'));
   const sessionId = 'session-no-model';
 
   seedSessionState(dataDir, sessionId, {

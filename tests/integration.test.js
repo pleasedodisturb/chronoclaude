@@ -86,7 +86,7 @@ function parseHookOutput(stdout) {
 }
 
 test('prompt, stop, then prompt includes idle and prior execution timing context', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-integration-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-integration-'));
   const sessionId = 'session-1';
 
   const firstPrompt = await runUserPromptSubmit({
@@ -131,7 +131,7 @@ test('prompt, stop, then prompt includes idle and prior execution timing context
 });
 
 test('prompt, stop, prompt, stop, then prompt reports the second turn execution duration', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-integration-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-integration-'));
   const sessionId = 'session-1';
 
   const firstPrompt = await runUserPromptSubmit({
@@ -194,7 +194,7 @@ test('prompt, stop, prompt, stop, then prompt reports the second turn execution 
 });
 
 test('prompt after more than one idle minute includes a visible TUI system message', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-integration-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-integration-'));
   const sessionId = 'session-1';
 
   const firstPrompt = await runUserPromptSubmit({

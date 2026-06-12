@@ -46,7 +46,7 @@ function runUserPromptSubmit({ input, dataDir, nowIso, extraEnv = {} }) {
 }
 
 test('first prompt injects only the timestamp block and persists lastUserPromptAt', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-user-prompt-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-user-prompt-'));
   const nowIso = '2026-04-13T05:00:00.000+10:00';
 
   const result = await runUserPromptSubmit({
@@ -73,7 +73,7 @@ test('first prompt injects only the timestamp block and persists lastUserPromptA
 });
 
 test('later prompts include idle and previous execution timings from state', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-user-prompt-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-user-prompt-'));
   const nowIso = '2026-04-13T05:00:10.000+10:00';
 
   fs.mkdirSync(path.join(dataDir, 'sessions'), { recursive: true });
@@ -124,7 +124,7 @@ test('later prompts include idle and previous execution timings from state', asy
 });
 
 test('idle gaps over one minute are shown to the user without adding the note to additionalContext', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-user-prompt-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-user-prompt-'));
   const nowIso = '2026-04-13T05:05:06.000+10:00';
 
   fs.mkdirSync(path.join(dataDir, 'sessions'), { recursive: true });
@@ -166,7 +166,7 @@ test('idle gaps over one minute are shown to the user without adding the note to
 });
 
 test('CLAUDE_TIMING_PASSIVE=0 omits additionalContext but still persists state', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-user-prompt-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-user-prompt-'));
   const nowIso = '2026-04-13T05:00:00.000+10:00';
 
   const result = await runUserPromptSubmit({
@@ -188,7 +188,7 @@ test('CLAUDE_TIMING_PASSIVE=0 omits additionalContext but still persists state',
 });
 
 test('CLAUDE_TIMING_IDLE_NOTE=0 suppresses the idle systemMessage but keeps the passive block', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-user-prompt-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-user-prompt-'));
   const nowIso = '2026-04-13T05:05:06.000+10:00';
 
   fs.mkdirSync(path.join(dataDir, 'sessions'), { recursive: true });
@@ -216,7 +216,7 @@ test('CLAUDE_TIMING_IDLE_NOTE=0 suppresses the idle systemMessage but keeps the 
 });
 
 test('both passive and idle-note disabled yields a bare envelope', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-user-prompt-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-user-prompt-'));
 
   const result = await runUserPromptSubmit({
     input: { session_id: 'session-1' },
@@ -232,7 +232,7 @@ test('both passive and idle-note disabled yields a bare envelope', async () => {
 });
 
 test('missing session_id exits 0 fail-soft with stderr and no state access', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-user-prompt-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-user-prompt-'));
 
   const result = await runUserPromptSubmit({
     input: {},
