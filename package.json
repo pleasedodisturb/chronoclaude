@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.5.0",
   "description": "Claude Code time-awareness plugin: visible per-message timestamps, hidden timing context, idle notes, an MCP time server, and a /timestamps timeline.",
+  "license": "MIT",
   "scripts": {
     "test": "node --test tests/*.test.js",
     "validate:plugin": "sh -c 'if command -v claude >/dev/null 2>&1; then claude plugin validate .; else printf \"skip: claude CLI not installed\\n\"; fi'",

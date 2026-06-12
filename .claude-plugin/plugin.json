@@ -8,6 +8,6 @@
   },
   "homepage": "https://github.com/pleasedodisturb/chronoclaude",
   "repository": "https://github.com/pleasedodisturb/chronoclaude",
-  "license": "Unlicense OR CC0-1.0",
+  "license": "MIT",
   "keywords": ["timing", "idle", "context", "hooks", "userpromptsubmit", "messagedisplay", "timestamps", "mcp", "temporal-awareness", "chrono"]
 }

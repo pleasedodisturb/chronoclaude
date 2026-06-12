@@ -1,9 +1,14 @@
 # Third-Party Licenses
 
-This plugin's own code is dual-licensed under the Unlicense and CC0 1.0
-Universal (see [`LICENSE`](./LICENSE)). Some components are derived from
-third-party code and remain under their original licenses, reproduced in full
-below.
+This plugin's own code is licensed under the MIT License (see
+[`LICENSE`](./LICENSE)). Some components are derived from third-party code
+and remain under their original licenses, reproduced in full below.
+
+The plugin originated as a fork of
+[clankercode/claude-inject-idle-time](https://github.com/clankercode/claude-inject-idle-time),
+which its author released into the public domain (dual Unlicense / CC0 1.0
+Universal). The public-domain dedication permits redistribution of derivative
+work under MIT; the original is credited here for provenance.
 
 ## `scripts/parse-transcript.py` — retrospective `/timestamps` mode
 
