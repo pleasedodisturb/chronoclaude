@@ -1,11 +1,11 @@
 ---
-description: Show which idle-timing surfaces are on/off and a paste-ready snippet to toggle them
+description: Show which chronoclaude surfaces are on/off and a paste-ready snippet to toggle them
 allowed-tools: [Read, Bash]
 ---
 
-# Idle-time surface configuration
+# ChronoClaude surface configuration
 
-Goal: report the effective on/off state of each idle-timing surface and give the user a paste-ready `settings.json` snippet to toggle any of them. **Do not modify any files** — this command prints information only.
+Goal: report the effective on/off state of each chronoclaude surface and give the user a paste-ready `settings.json` snippet to toggle any of them. **Do not modify any files** — this command prints information only.
 
 Surfaces and their environment variables (each defaults to **on**; a surface is off only when its variable is set to `0`, `false`, `off`, or `no`, case-insensitive):
 

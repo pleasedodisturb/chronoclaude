@@ -41,7 +41,7 @@ function runStop({ input, dataDir, nowIso }) {
 }
 
 test('stop records stop time, assistant time, and previous execution duration when lastUserPromptAt exists', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-stop-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-stop-'));
   const nowIso = '2026-04-12T19:00:10.000Z';
 
   fs.mkdirSync(path.join(dataDir, 'sessions'), { recursive: true });
@@ -79,7 +79,7 @@ test('stop records stop time, assistant time, and previous execution duration wh
 });
 
 test('stop still records stop time and assistant time when no last prompt timestamp exists', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-stop-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-stop-'));
   const nowIso = '2026-04-12T19:05:00.000Z';
 
   fs.mkdirSync(path.join(dataDir, 'sessions'), { recursive: true });
@@ -115,7 +115,7 @@ test('stop still records stop time and assistant time when no last prompt timest
 });
 
 test('repeat stop for the same turn preserves the existing execution duration', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-stop-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-stop-'));
   const firstStopIso = '2026-04-12T19:00:10.000Z';
   const secondStopIso = '2026-04-12T19:00:12.000Z';
 
@@ -166,7 +166,7 @@ test('missing or falsy session_id exits 0 fail-soft with stderr', async () => {
   const cases = [{}, { session_id: '' }, { session_id: null }];
 
   for (const input of cases) {
-    const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-stop-'));
+    const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-stop-'));
     const result = await runStop({
       input,
       dataDir,

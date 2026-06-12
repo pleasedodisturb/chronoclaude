@@ -12,7 +12,7 @@
     {
       "name": "chronoclaude",
       "source": "./",
-      "version": "0.5.1",
+      "version": "0.5.2",
       "description": "Time awareness for Claude Code: visible per-message timestamps, hidden timing context, idle notes, an MCP time server, and a /timestamps timeline — every surface toggleable.",
       "homepage": "https://github.com/pleasedodisturb/chronoclaude",
       "repository": "https://github.com/pleasedodisturb/chronoclaude",

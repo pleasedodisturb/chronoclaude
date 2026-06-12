@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Parse a Claude Code transcript JSONL file and display a timestamped message timeline.
 
-Based on s-a-s-k-i-a/claude-code-timestamps (MIT), adapted for the idle-timing plugin.
+Based on s-a-s-k-i-a/claude-code-timestamps (MIT), adapted for the chronoclaude plugin.
 """
 
 import json

@@ -24,7 +24,7 @@ function startServer(options = {}) {
   // disk-merge fallback cannot read the real machine's plugin timelines. Tests
   // that exercise the merge pass an explicit dataDir seeded with fixtures.
   const dataDir =
-    options.dataDir || fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-srv-'));
+    options.dataDir || fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-srv-'));
 
   const proc = spawn('node', [SERVER_PATH], {
     stdio: ['pipe', 'pipe', 'pipe'],
@@ -95,7 +95,7 @@ test('initialize returns server info and tool capability', async () => {
   const server = startServer();
   const res = await server.init();
 
-  assert.equal(res.result.serverInfo.name, 'idle-timing-time-server');
+  assert.equal(res.result.serverInfo.name, 'chronoclaude-time-server');
   assert.ok(res.result.capabilities.tools);
   server.kill();
 });
@@ -241,7 +241,7 @@ test('unknown tool returns error response', async () => {
 });
 
 function seedTimeline(lines) {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-srv-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-srv-'));
   const timelinesDir = path.join(dataDir, 'timelines');
   fs.mkdirSync(timelinesDir, { recursive: true });
   fs.writeFileSync(
@@ -313,7 +313,7 @@ test('get_timeline reads the most-recent disk timeline when no session_id is giv
 });
 
 test('get_timeline tolerates a corrupt timeline line without throwing', async () => {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idle-timing-srv-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-srv-'));
   const timelinesDir = path.join(dataDir, 'timelines');
   fs.mkdirSync(timelinesDir, { recursive: true });
   fs.writeFileSync(
