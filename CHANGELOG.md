@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-06-12
+
 ### Changed
 - **Relicensed from Unlicense/CC0 to MIT.** The plugin's own code is now under the MIT License, matching the two MIT upstreams already credited in `THIRD-PARTY-LICENSES.md`. The original clankercode base was public domain (Unlicense / CC0 1.0), which permits the relicense; a provenance note was added to `THIRD-PARTY-LICENSES.md`. License metadata updated in `plugin.json`, `marketplace.json`, and `package.json`.
 
