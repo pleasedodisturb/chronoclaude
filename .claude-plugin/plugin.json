@@ -1,6 +1,6 @@
 {
   "name": "chronoclaude",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Time awareness for Claude Code: visible per-message timestamps, hidden timing context, idle notes, an MCP time server, and a /timestamps timeline — every surface toggleable.",
   "author": {
     "name": "pleasedodisturb",
