@@ -1,0 +1,73 @@
+<!doctype html>
+<!--
+  Source mockup for docs/screenshots/default-render.png — rendered via headless
+  Chrome + ImageMagick (see tools-cheatsheet "Programmatic screenshots").
+  The REAL default appearance, in the Catppuccin Mocha terminal theme (companion
+  to the annotated features-overview.png). Same session; how it actually looks out
+  of the box — grey [HH:MM:SS] marker (theme overlay), themed UI colours, dim idle
+  note + statusline, hidden [timing] block omitted. Title/caption live in the README.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  :root{
+    /* Catppuccin Mocha */
+    --crust:#11111b; --base:#1e1e2e; --mantle:#181825;
+    --text:#cdd6f4; --subtext0:#a6adc8; --overlay1:#7f849c; --overlay0:#6c7086; --surface2:#585b70;
+    --blue:#89b4fa; --green:#a6e3a1; --yellow:#f9e2af; --peach:#fab387;
+    --red:#f38ba8; --mauve:#cba6f7; --teal:#94e2d5;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--crust);display:inline-block;
+    font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{padding:28px 30px;width:1220px}
+  .term{background:var(--base);border:1px solid #313244;border-radius:12px;overflow:hidden;
+    box-shadow:0 10px 34px rgba(0,0,0,.35)}
+  .termbar{display:flex;align-items:center;gap:7px;padding:11px 15px;background:var(--mantle);color:var(--overlay1);font-size:12.5px}
+  .dot{width:11px;height:11px;border-radius:50%}
+  .r{background:#f38ba8}.y{background:#f9e2af}.g{background:#a6e3a1}
+  .termbar .t{margin-left:9px;color:var(--subtext0)}
+  .body{padding:18px 22px 20px;font-family:"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+    font-size:14px;line-height:1.66;color:var(--text)}
+  .l{white-space:pre-wrap;word-break:break-word;padding:1.5px 0}
+  .ts{color:var(--overlay1)}                 /* grey default marker (theme overlay) */
+  .idle{color:var(--overlay0)}               /* dim system note */
+  .uarrow{color:var(--green)}                /* prompt accent */
+  .user{color:var(--text)}
+  .bullet{color:var(--blue)}
+  .tool{color:var(--blue)}
+  .arg{color:var(--overlay0)}
+  .dim{color:var(--overlay0)}
+  .code{color:var(--peach)}
+  .num{color:var(--red)}
+  .ok{color:var(--green)}
+  ul.bul{margin:2px 0;padding-left:16px;color:var(--text)}ul.bul li{margin:0}
+  .sep{border:none;border-top:1px solid #313244;margin:11px 0 3px}
+  .status{color:var(--subtext0)}
+  .plus{color:var(--green)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="term">
+    <div class="termbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">claude — ~/src/acme-api</span></div>
+    <div class="body">
+      <div class="l idle">[after 12m 4s]</div>
+      <div class="l"><span class="uarrow">&gt;</span> <span class="user">the login endpoint 500s when the email has a +alias (e.g. user+test@acme.io) — can you find why?</span></div>
+      <div class="l"><span class="ts">[16:04:27]</span> On it — I'll grep the auth handler and the email validator it calls before guessing.</div>
+      <div class="l"><span class="bullet">●</span> <span class="tool">Grep</span><span class="arg">("validateEmail")</span> <span class="ok">→ 3 matches</span></div>
+      <div class="l"><span class="bullet">●</span> <span class="tool">Read</span><span class="arg">(src/auth/email.ts)</span></div>
+      <div class="l"><span class="ts">[16:04:58]</span> Found it. The local-part regex is anchored on <span class="code">[^+]</span>, so any address with a <span class="plus">+</span> tag is rejected — and the rejection <span class="num">throws</span> instead of returning <span class="num">400</span>, which is why you get a <span class="num">500</span>. Want me to relax the regex and return a clean 400 on bad input?</div>
+      <div class="l"><span class="uarrow">&gt;</span> <span class="user">yes, and add a test for the +alias case</span></div>
+      <div class="l"><span class="ts">[16:05:36]</span> Done:</div>
+      <div class="l"><ul class="bul"><li>relaxed the local-part regex to allow <span class="plus">+</span></li><li>validator now returns <span class="num">400</span> on invalid input instead of throwing</li><li>added <span class="code">auth/email.test.ts</span> covering <span class="code">user+test@acme.io</span></li></ul></div>
+      <div class="l"><span class="bullet">●</span> <span class="tool">Bash</span><span class="arg">(npm test)</span></div>
+      <div class="l"><span class="ts">[16:06:02]</span> <span class="ok">All 48 tests pass</span>, including the new +alias case. The fix is a 4-line change in <span class="code">email.ts</span> plus the test.</div>
+      <hr class="sep">
+      <div class="l status">16:06 · ⧗ 2m 11s since last reply · acme-api · <span class="ok">main ✓</span></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
