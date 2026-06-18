@@ -10,6 +10,10 @@
 
 ![Annotated ChronoClaude session: a terminal showing the message timestamp, idle note, hidden timing block, tool timeline and statusline, with a colour-coded legend mapping each of the seven surfaces to its CLAUDE_TIMING_* flag](docs/screenshots/features-overview.png)
 
+<sub>↑ The per-surface colours are **illustrative** — a legend to tell the seven surfaces apart. Here's how it **actually looks** out of the box (only the `[HH:MM:SS]` marker is coloured — grey by default, set via `CLAUDE_TIMING_MESSAGE_DISPLAY_COLOR`):</sub>
+
+![The same ChronoClaude session in its real default appearance: grey [HH:MM:SS] markers, a dim idle note and statusline, normal message text, no per-surface colours](docs/screenshots/default-render.png)
+
 ## Features
 
 | Surface | What you get | Visible? | Toggle (default on) |

@@ -1,0 +1,72 @@
+<!doctype html>
+<!--
+  Source mockup for docs/screenshots/default-render.png — rendered via headless
+  Chrome + ImageMagick (see tools-cheatsheet "Programmatic screenshots").
+  The *realistic default* appearance (companion to the annotated
+  features-overview.png): same session, but how it actually looks out of the box —
+  grey [HH:MM:SS] marker, dim idle note + statusline, no per-surface colours,
+  no legend, and the hidden [timing] block omitted (you never see it).
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  :root{
+    --bg:#0d0d0d; --win:#191919; --bar:#232323; --border:#2c2c2c;
+    --text:#d6d6d6; --muted:#8d8d8d; --dim:#6a727d; --white:#f2f2f2;
+    --ts:#8a8a8a;       /* default grey marker (ANSI 90) */
+    --tool:#9aa0a6;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);
+    font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  .page{width:1180px;padding:34px 36px 30px}
+  h1{font-size:20px;margin:0 0 3px;color:var(--white)}
+  h1 .v{color:var(--muted);font-weight:500;font-size:14px}
+  .sub{color:var(--muted);font-size:13px;margin:0 0 20px}
+  .sub code{color:var(--dim)}
+  .term{background:var(--win);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .termbar{display:flex;align-items:center;gap:7px;padding:11px 15px;background:var(--bar);color:var(--muted);font-size:12.5px}
+  .dot{width:11px;height:11px;border-radius:50%}
+  .r{background:#ff5f57}.y{background:#febc2e}.g{background:#28c840}
+  .termbar .t{margin-left:9px}
+  .body{padding:18px 22px 20px;font-family:"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+    font-size:13.5px;line-height:1.66;color:var(--text)}
+  .l{white-space:pre-wrap;word-break:break-word;padding:1.5px 0}
+  .ts{color:var(--ts)}             /* grey timestamp marker */
+  .idle{color:var(--dim)}          /* dim system note */
+  .user{color:var(--white)}
+  .tool{color:var(--tool)}
+  .dim{color:var(--dim)}.white{color:var(--white)}
+  ul.bul{margin:2px 0;padding-left:16px;color:var(--text)}
+  ul.bul li{margin:0}
+  .sep{border:none;border-top:1px solid #2a2a2a;margin:11px 0 3px}
+  .status{color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>ChronoClaude <span class="v">— how it actually looks (default)</span></h1>
+  <p class="sub">Same session, out of the box. Only the <code>[HH:MM:SS]</code> marker is coloured — grey by default, set via <code>CLAUDE_TIMING_MESSAGE_DISPLAY_COLOR</code>. The hidden <code>[timing]</code> block isn't shown — you never see it.</p>
+
+  <div class="term">
+    <div class="termbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">claude — ~/src/acme-api</span></div>
+    <div class="body">
+      <div class="l idle">[after 12m 4s]</div>
+      <div class="l user">&gt; the login endpoint 500s when the email has a +alias (e.g. user+test@acme.io) — can you find why?</div>
+      <div class="l"><span class="ts">[16:04:27]</span> On it — I'll grep the auth handler and the email validator it calls before guessing.</div>
+      <div class="l tool">● Grep<span class="dim">("validateEmail")</span> → 3 matches</div>
+      <div class="l tool">● Read<span class="dim">(src/auth/email.ts)</span></div>
+      <div class="l"><span class="ts">[16:04:58]</span> Found it. The local-part regex is anchored on <span class="dim">[^+]</span>, so any address with a <span class="white">+</span> tag is rejected — and the rejection <span class="white">throws</span> instead of returning 400, which is why you get a 500. Want me to relax the regex and return a clean 400 on bad input?</div>
+      <div class="l user">&gt; yes, and add a test for the +alias case</div>
+      <div class="l"><span class="ts">[16:05:36]</span> Done:</div>
+      <div class="l"><ul class="bul"><li>relaxed the local-part regex to allow <span class="dim">+</span></li><li>validator now returns <span class="white">400</span> on invalid input instead of throwing</li><li>added <span class="dim">auth/email.test.ts</span> covering <span class="dim">user+test@acme.io</span></li></ul></div>
+      <div class="l tool">● Bash<span class="dim">(npm test)</span></div>
+      <div class="l"><span class="ts">[16:06:02]</span> All 48 tests pass, including the new +alias case. The fix is a 4-line change in <span class="dim">email.ts</span> plus the test.</div>
+      <hr class="sep">
+      <div class="l status">16:06 · ⧗ 2m 11s since last reply · acme-api · main ✓</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
