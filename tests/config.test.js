@@ -1,6 +1,12 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { isEnabled, SURFACES, messageDisplayColorCode } = require('../src/config');
+const {
+  isEnabled,
+  SURFACES,
+  OPT_IN_SURFACES,
+  terminalSupportsAnsi,
+  messageDisplayColorCode
+} = require('../src/config');
 
 test('isEnabled defaults to true when the env var is unset', () => {
   assert.equal(isEnabled('passive', {}), true);
@@ -35,14 +41,60 @@ test('isEnabled returns true for an unknown surface key (never silently suppress
   assert.equal(isEnabled('does-not-exist', { ANYTHING: '0' }), true);
 });
 
-test('SURFACES maps the four surfaces to CLAUDE_TIMING_* variables', () => {
+test('SURFACES maps every surface to a CLAUDE_TIMING_* variable', () => {
   assert.deepEqual(
     Object.keys(SURFACES).sort(),
-    ['idleNote', 'messageDisplay', 'passive', 'timeline']
+    ['idleNote', 'messageDisplay', 'passive', 'stopTimestamp', 'timeline']
   );
 
   for (const varName of Object.values(SURFACES)) {
     assert.match(varName, /^CLAUDE_TIMING_/);
+  }
+});
+
+test('stopTimestamp is the only opt-in (default-off) surface', () => {
+  assert.deepEqual([...OPT_IN_SURFACES].sort(), ['stopTimestamp']);
+});
+
+test('opt-in surfaces default to OFF when the env var is unset or empty', () => {
+  assert.equal(isEnabled('stopTimestamp', {}), false);
+  assert.equal(isEnabled('stopTimestamp', { CLAUDE_TIMING_STOP_TIMESTAMP: '' }), false);
+});
+
+test('opt-in surfaces turn on ONLY for an explicit truthy value', () => {
+  for (const value of ['1', 'true', 'on', 'yes', 'ON', ' Yes ', 'TRUE']) {
+    assert.equal(
+      isEnabled('stopTimestamp', { CLAUDE_TIMING_STOP_TIMESTAMP: value }),
+      true,
+      `expected on for ${JSON.stringify(value)}`
+    );
+  }
+});
+
+test('opt-in surfaces stay off for falsy or unrecognized values', () => {
+  for (const value of ['0', 'false', 'off', 'no', 'enabled', 'maybe']) {
+    assert.equal(
+      isEnabled('stopTimestamp', { CLAUDE_TIMING_STOP_TIMESTAMP: value }),
+      false,
+      `expected off for ${JSON.stringify(value)}`
+    );
+  }
+});
+
+test('terminalSupportsAnsi is true for the cli entrypoint and when unset', () => {
+  assert.equal(terminalSupportsAnsi({ CLAUDE_CODE_ENTRYPOINT: 'cli' }), true);
+  assert.equal(terminalSupportsAnsi({ CLAUDE_CODE_ENTRYPOINT: 'CLI' }), true);
+  assert.equal(terminalSupportsAnsi({}), true);
+  assert.equal(terminalSupportsAnsi({ CLAUDE_CODE_ENTRYPOINT: '' }), true);
+});
+
+test('terminalSupportsAnsi is false for GUI/remote entrypoints (no ANSI in panel)', () => {
+  for (const entrypoint of ['claude-vscode', 'remote', 'remote_mobile', 'mcp', 'claude-in-teams']) {
+    assert.equal(
+      terminalSupportsAnsi({ CLAUDE_CODE_ENTRYPOINT: entrypoint }),
+      false,
+      `expected no ANSI for ${entrypoint}`
+    );
   }
 });
 

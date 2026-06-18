@@ -27,7 +27,11 @@
 'use strict';
 
 const { getNowIso, clockFromIso } = require('../src/time');
-const { isEnabled, messageDisplayColorCode } = require('../src/config');
+const {
+  isEnabled,
+  terminalSupportsAnsi,
+  messageDisplayColorCode
+} = require('../src/config');
 
 async function readStdin() {
   let input = '';
@@ -53,8 +57,11 @@ async function main() {
 
   if (clock) {
     // Colour ONLY the marker; reset before the delta so the assistant's text
-    // is never recoloured and no SGR code bleeds past the timestamp.
-    const code = messageDisplayColorCode();
+    // is never recoloured and no SGR code bleeds past the timestamp. Suppress
+    // colour entirely on non-terminal surfaces (VS Code / JetBrains panels,
+    // web, …), where raw SGR codes render as literal `[90m…[0m` text rather
+    // than colour — there a plain `[HH:MM:SS]` is the only clean rendering.
+    const code = terminalSupportsAnsi() ? messageDisplayColorCode() : null;
     const marker = code ? `[${code}m[${clock}][0m` : `[${clock}]`;
     displayContent = `${marker} ${delta}`;
   } else {

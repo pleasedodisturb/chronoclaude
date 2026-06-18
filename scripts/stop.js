@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 
 const { loadSessionState, saveSessionState } = require('../src/state');
-const { getNowIso, diffMs } = require('../src/time');
+const { getNowIso, diffMs, clockFromIso } = require('../src/time');
+const { formatStopTimestamp } = require('../src/format');
+const { isEnabled } = require('../src/config');
 
 async function readStdin() {
   let input = '';
@@ -47,6 +49,20 @@ async function main() {
     sessionId,
     state: nextState
   });
+
+  // State above is persisted unconditionally — it underpins every surface.
+  // The toggle gates only the emitted output. `stopTimestamp` is opt-in
+  // (default off): it surfaces a per-turn `[HH:MM:SS]` note via `systemMessage`
+  // for IDE-extension panels (VSCode/JetBrains) where the inline MessageDisplay
+  // marker never fires. Off by default so the terminal TUI — which already
+  // shows the inline marker — isn't double-stamped.
+  if (isEnabled('stopTimestamp')) {
+    const systemMessage = formatStopTimestamp(clockFromIso(lastStopAt));
+
+    if (systemMessage) {
+      process.stdout.write(JSON.stringify({ systemMessage }));
+    }
+  }
 }
 
 main().catch((error) => {

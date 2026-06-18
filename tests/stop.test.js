@@ -8,14 +8,18 @@ const { spawn } = require('node:child_process');
 const rootDir = path.resolve(__dirname, '..');
 const scriptPath = path.join(rootDir, 'scripts', 'stop.js');
 
-function runStop({ input, dataDir, nowIso }) {
+function runStop({ input, dataDir, nowIso, env: extraEnv }) {
   return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, [scriptPath], {
       cwd: rootDir,
       env: {
         ...process.env,
+        // Default-off opt-in surface; clear any inherited value so the existing
+        // "no stdout" assertions hold regardless of the runner's environment.
+        CLAUDE_TIMING_STOP_TIMESTAMP: '',
         ...(dataDir ? { CLAUDE_PLUGIN_DATA: dataDir } : {}),
-        CLAUDE_TIMING_NOW_ISO: nowIso
+        CLAUDE_TIMING_NOW_ISO: nowIso,
+        ...extraEnv
       },
       stdio: ['pipe', 'pipe', 'pipe']
     });
@@ -189,4 +193,56 @@ test('missing CLAUDE_PLUGIN_DATA exits 0 fail-soft with stderr', async () => {
   assert.equal(result.code, 0);
   assert.equal(result.stdout, '');
   assert.match(result.stderr, /CLAUDE_PLUGIN_DATA is required/);
+});
+
+test('stop emits a [HH:MM:SS] systemMessage when CLAUDE_TIMING_STOP_TIMESTAMP is on', async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-stop-'));
+  const nowIso = '2026-04-12T19:00:10.000Z';
+
+  const result = await runStop({
+    input: { session_id: 'session-1' },
+    dataDir,
+    nowIso,
+    env: { CLAUDE_TIMING_STOP_TIMESTAMP: '1' }
+  });
+
+  assert.equal(result.code, 0, `expected success, stderr was: ${result.stderr}`);
+  assert.equal(result.stderr, '');
+  assert.deepEqual(JSON.parse(result.stdout), { systemMessage: '[19:00:10]' });
+
+  // The workaround output must not disturb the state file the other surfaces use.
+  const state = JSON.parse(
+    fs.readFileSync(path.join(dataDir, 'sessions', 'session-1.json'), 'utf8')
+  );
+  assert.equal(state.lastStopAt, nowIso);
+});
+
+test('stop stays silent when CLAUDE_TIMING_STOP_TIMESTAMP is off (default)', async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-stop-'));
+
+  const result = await runStop({
+    input: { session_id: 'session-1' },
+    dataDir,
+    nowIso: '2026-04-12T19:00:10.000Z'
+    // no env override → opt-in surface defaults off
+  });
+
+  assert.equal(result.code, 0, `expected success, stderr was: ${result.stderr}`);
+  assert.equal(result.stdout, '');
+  assert.equal(result.stderr, '');
+});
+
+test('stop stays silent for an explicit falsy CLAUDE_TIMING_STOP_TIMESTAMP', async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chronoclaude-stop-'));
+
+  const result = await runStop({
+    input: { session_id: 'session-1' },
+    dataDir,
+    nowIso: '2026-04-12T19:00:10.000Z',
+    env: { CLAUDE_TIMING_STOP_TIMESTAMP: 'off' }
+  });
+
+  assert.equal(result.code, 0, `expected success, stderr was: ${result.stderr}`);
+  assert.equal(result.stdout, '');
+  assert.equal(result.stderr, '');
 });
