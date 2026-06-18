@@ -48,6 +48,17 @@ The inline `[HH:MM:SS]` message timestamp rides the `MessageDisplay` hook. Two t
 
 - **Colour is auto-suppressed in the VS Code chat panel.** That panel renders the assistant message as rich text and shows raw ANSI/SGR escapes as literal `[90m…[0m` junk instead of colour. ChronoClaude detects the non-terminal client (via `CLAUDE_CODE_ENTRYPOINT=claude-vscode`) and emits a plain `[HH:MM:SS]` marker there automatically — no config needed. Colour still applies in any real terminal, including VS Code's *integrated terminal* and the JetBrains terminal tool window (where the CLI runs as a normal ANSI terminal). *(VS Code panel confirmed; JetBrains is inferred from its terminal-based integration, not yet tested end-to-end.)*
 - **The message timestamp needs a current extension.** It fires in current builds (confirmed Claude Code 2.1.181) but didn't in some earlier ones (reported on 2.1.165). Note that the VS Code panel does **not** render hook `systemMessage` output, so surfaces that rely on it (the idle note) don't show there — only the `MessageDisplay` marker does.
+- **If the timestamp doesn't appear at all in an IDE panel** (even on a current build), the host may not be wiring the plugin's `MessageDisplay` hook — a Claude Code plugin-loader gap specific to that event (confirmed on Windows 11 / VS Code 2.1.181; every *other* plugin hook loads fine). Workaround: register it directly in `~/.claude/settings.json` so it bypasses the plugin loader —
+
+    ```json
+    "hooks": {
+      "MessageDisplay": [
+        { "hooks": [ { "type": "command", "command": "node /absolute/path/to/chronoclaude/scripts/message-display.js", "timeout": 10 } ] }
+      ]
+    }
+    ```
+
+    (Not needed on macOS, where the plugin-loaded hook fires. Tracked upstream; this is a host issue, not a plugin-manifest one.)
 
 The visible message timestamp is grey by default. Recolour it with `CLAUDE_TIMING_MESSAGE_DISPLAY_COLOR` — a named colour (`grey`, `dim`, `cyan`, …), a raw SGR sequence (`1;90`), or `none` to disable colour. Only the `[HH:MM:SS]` marker is coloured; your message text is never touched.
 
