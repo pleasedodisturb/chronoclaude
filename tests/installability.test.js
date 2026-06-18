@@ -149,10 +149,10 @@ test('/chronoclaude-config slash command is registered', () => {
   assert.match(contents, /CLAUDE_TIMING_MESSAGE_DISPLAY/);
 });
 
-test('config module exposes all surface toggles', () => {
+test('config module exposes the four surface toggles', () => {
   const { SURFACES } = require(path.join(rootDir, 'src', 'config.js'));
   assert.deepEqual(
     Object.keys(SURFACES).sort(),
-    ['idleNote', 'messageDisplay', 'passive', 'stopTimestamp', 'timeline']
+    ['idleNote', 'messageDisplay', 'passive', 'timeline']
   );
 });

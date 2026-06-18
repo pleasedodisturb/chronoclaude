@@ -3,7 +3,6 @@ const assert = require('node:assert/strict');
 const {
   isEnabled,
   SURFACES,
-  OPT_IN_SURFACES,
   terminalSupportsAnsi,
   messageDisplayColorCode
 } = require('../src/config');
@@ -41,43 +40,14 @@ test('isEnabled returns true for an unknown surface key (never silently suppress
   assert.equal(isEnabled('does-not-exist', { ANYTHING: '0' }), true);
 });
 
-test('SURFACES maps every surface to a CLAUDE_TIMING_* variable', () => {
+test('SURFACES maps the four surfaces to CLAUDE_TIMING_* variables', () => {
   assert.deepEqual(
     Object.keys(SURFACES).sort(),
-    ['idleNote', 'messageDisplay', 'passive', 'stopTimestamp', 'timeline']
+    ['idleNote', 'messageDisplay', 'passive', 'timeline']
   );
 
   for (const varName of Object.values(SURFACES)) {
     assert.match(varName, /^CLAUDE_TIMING_/);
-  }
-});
-
-test('stopTimestamp is the only opt-in (default-off) surface', () => {
-  assert.deepEqual([...OPT_IN_SURFACES].sort(), ['stopTimestamp']);
-});
-
-test('opt-in surfaces default to OFF when the env var is unset or empty', () => {
-  assert.equal(isEnabled('stopTimestamp', {}), false);
-  assert.equal(isEnabled('stopTimestamp', { CLAUDE_TIMING_STOP_TIMESTAMP: '' }), false);
-});
-
-test('opt-in surfaces turn on ONLY for an explicit truthy value', () => {
-  for (const value of ['1', 'true', 'on', 'yes', 'ON', ' Yes ', 'TRUE']) {
-    assert.equal(
-      isEnabled('stopTimestamp', { CLAUDE_TIMING_STOP_TIMESTAMP: value }),
-      true,
-      `expected on for ${JSON.stringify(value)}`
-    );
-  }
-});
-
-test('opt-in surfaces stay off for falsy or unrecognized values', () => {
-  for (const value of ['0', 'false', 'off', 'no', 'enabled', 'maybe']) {
-    assert.equal(
-      isEnabled('stopTimestamp', { CLAUDE_TIMING_STOP_TIMESTAMP: value }),
-      false,
-      `expected off for ${JSON.stringify(value)}`
-    );
   }
 });
 

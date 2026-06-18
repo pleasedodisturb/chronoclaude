@@ -4,18 +4,10 @@
  * Per-surface on/off toggles.
  *
  * Each user-facing surface can be disabled independently via an environment
- * variable. Most surfaces are ON by default — disabled only when their variable
- * is explicitly set to a falsy value (`0`, `false`, `off`, `no`,
+ * variable. Surfaces are ON by default — a surface is only disabled when its
+ * variable is explicitly set to a falsy value (`0`, `false`, `off`, `no`,
  * case-insensitive). Unknown/unset variables leave the surface on, so a typo
  * never silently suppresses output.
- *
- * A small set of surfaces are *opt-in* (OFF by default, see `OPT_IN_SURFACES`):
- * they only turn on for an explicit truthy value (`1`, `true`, `on`, `yes`).
- * These are workarounds that would otherwise duplicate another surface — e.g.
- * `stopTimestamp` emits a per-turn `[HH:MM:SS]` note for IDE-extension panels
- * (VSCode/JetBrains) where the inline `MessageDisplay` marker never fires;
- * leaving it on by default would double-stamp every turn in the terminal TUI,
- * which already gets the inline marker.
  *
  * Env-var driven (not a config file) to match the existing `CLAUDE_TIMING_*`
  * idiom (see `src/time.js` `CLAUDE_TIMING_NOW_ISO`) and to stay trivially
@@ -26,16 +18,10 @@ const SURFACES = {
   passive: 'CLAUDE_TIMING_PASSIVE',
   idleNote: 'CLAUDE_TIMING_IDLE_NOTE',
   messageDisplay: 'CLAUDE_TIMING_MESSAGE_DISPLAY',
-  timeline: 'CLAUDE_TIMING_TIMELINE',
-  stopTimestamp: 'CLAUDE_TIMING_STOP_TIMESTAMP'
+  timeline: 'CLAUDE_TIMING_TIMELINE'
 };
 
-// Surfaces that are OFF by default and require an explicit truthy value to
-// enable (the inverse of the default-on surfaces above).
-const OPT_IN_SURFACES = new Set(['stopTimestamp']);
-
 const OFF_VALUES = new Set(['0', 'false', 'off', 'no']);
-const ON_VALUES = new Set(['1', 'true', 'on', 'yes']);
 
 // Named colours → SGR code for the visible MessageDisplay marker.
 const COLOR_CODES = {
@@ -78,15 +64,25 @@ function messageDisplayColorCode(env = process.env) {
   return DEFAULT_MESSAGE_DISPLAY_COLOR;
 }
 
-// SGR colour in the MessageDisplay `displayContent` only renders in the real
-// terminal TUI. GUI/remote clients (VS Code / JetBrains extension panels, web,
-// mobile, etc.) display the raw escape codes as literal text — e.g. a grey
-// marker leaks as `[90m[12:34:56][0m` on screen. The host advertises the client
-// via `CLAUDE_CODE_ENTRYPOINT` (`cli` for the terminal; `claude-vscode`,
-// `remote*`, … for everything else — see Claude Code's entrypoint switch). We
-// only emit colour when we're confident the surface renders ANSI: entrypoint
-// `cli`, or unset (covers the test harness and preserves the historical grey
-// default). Any other value → plain marker, no escape codes.
+// SGR colour in the MessageDisplay `displayContent` only renders on surfaces
+// that interpret ANSI. Rich-text chat panels do not: the VS Code extension
+// panel renders the assistant message as formatted text and shows the raw
+// escapes as literal `[90m[12:34:56][0m` junk (confirmed, anthropics/claude-code
+// #44763). The host advertises the surface via `CLAUDE_CODE_ENTRYPOINT` — values
+// taken from Claude Code's own entrypoint switch: `cli` (terminal TUI),
+// `claude-vscode` (VS Code chat panel), `remote*`, `mcp`, `sdk-*`, etc.
+//
+// Rule: emit colour only for `cli` or unset; plain marker otherwise.
+//   - VS Code chat panel → `claude-vscode` → plain (fixes the leak).
+//   - Terminal TUI, and VS Code's *integrated terminal* → `cli` → colour.
+//   - JetBrains: its integration runs the CLI inside the IDE's terminal tool
+//     window (a real ANSI terminal — cf. `isJetBrainsIdeTerminal` in the CC
+//     binary), so it reports `cli` and colour renders fine. Inferred, not yet
+//     tested end-to-end, but safe either way: the only colour branch requires
+//     an ANSI-capable `cli` surface, so a distinct/non-cli entrypoint would just
+//     fall through to plain.
+//   - unset → assume terminal (covers the test harness; preserves the grey
+//     default). Any other value → plain, no escape codes.
 const TERMINAL_ENTRYPOINTS = new Set(['cli']);
 
 function terminalSupportsAnsi(env = process.env) {
@@ -107,22 +103,16 @@ function isEnabled(key, env = process.env) {
   }
 
   const raw = env[varName];
-  const optIn = OPT_IN_SURFACES.has(key);
 
   if (raw === undefined || raw === null || raw === '') {
-    return !optIn; // default-on surfaces → on; opt-in surfaces → off
+    return true;
   }
 
-  const value = String(raw).trim().toLowerCase();
-
-  // Opt-in surfaces turn on ONLY for an explicit truthy value; default-on
-  // surfaces turn off ONLY for an explicit falsy value.
-  return optIn ? ON_VALUES.has(value) : !OFF_VALUES.has(value);
+  return !OFF_VALUES.has(String(raw).trim().toLowerCase());
 }
 
 module.exports = {
   SURFACES,
-  OPT_IN_SURFACES,
   isEnabled,
   terminalSupportsAnsi,
   messageDisplayColorCode

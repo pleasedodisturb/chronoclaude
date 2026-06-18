@@ -14,9 +14,12 @@ function run(input, extraEnv = {}) {
     env: {
       ...process.env,
       CLAUDE_TIMING_NOW_ISO: FIXED_NOW,
-      // Pin the terminal entrypoint so colour assertions are deterministic
-      // regardless of where the suite runs (the runner may itself be in VS Code).
+      // Pin colour inputs so assertions are deterministic regardless of the
+      // runner's own env (e.g. a developer running the suite inside VS Code, or
+      // with CLAUDE_TIMING_MESSAGE_DISPLAY_COLOR exported): default entrypoint to
+      // the ANSI-capable terminal, and clear any inherited colour override.
       CLAUDE_CODE_ENTRYPOINT: 'cli',
+      CLAUDE_TIMING_MESSAGE_DISPLAY_COLOR: '',
       ...extraEnv
     },
     timeout: 5000,

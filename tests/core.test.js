@@ -5,11 +5,7 @@ const os = require('node:os');
 const path = require('node:path');
 
 const { toIsoUtc, toLocalIso, getNowIso, stripMs, diffMs } = require('../src/time');
-const {
-  formatIdleSystemMessage,
-  formatStopTimestamp,
-  formatTimingBlock
-} = require('../src/format');
+const { formatIdleSystemMessage, formatTimingBlock } = require('../src/format');
 const { getSessionFilePath, loadSessionState, saveSessionState } = require('../src/state');
 
 test('toIsoUtc normalizes a date-like value to UTC ISO 8601', () => {
@@ -113,18 +109,6 @@ test('formatIdleSystemMessage omits short or unavailable idle gaps', () => {
   assert.equal(formatIdleSystemMessage(9999), null);
   assert.equal(formatIdleSystemMessage(null), null);
   assert.equal(formatIdleSystemMessage(Number.NaN), null);
-});
-
-test('formatStopTimestamp brackets an HH:MM:SS clock', () => {
-  assert.equal(formatStopTimestamp('16:04:19'), '[16:04:19]');
-  assert.equal(formatStopTimestamp('00:00:00'), '[00:00:00]');
-});
-
-test('formatStopTimestamp returns null for missing or non-string input', () => {
-  assert.equal(formatStopTimestamp(''), null);
-  assert.equal(formatStopTimestamp(null), null);
-  assert.equal(formatStopTimestamp(undefined), null);
-  assert.equal(formatStopTimestamp(160419), null);
 });
 
 test('loadSessionState returns a default object when the session is new', async () => {

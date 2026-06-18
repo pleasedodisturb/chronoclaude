@@ -48,21 +48,7 @@ function formatIdleSystemMessage(valueMs) {
   return `[after ${parts.join(' ')}]`;
 }
 
-// Per-turn visible timestamp note emitted by the Stop hook as a `systemMessage`.
-// This is the IDE-extension workaround for the inline `MessageDisplay` marker,
-// which never fires in the VSCode/JetBrains panels. `clock` is an `HH:MM:SS`
-// string (see `clockFromIso`); returns null for anything else so the hook
-// stays silent rather than emitting a malformed note.
-function formatStopTimestamp(clock) {
-  if (typeof clock !== 'string' || clock === '') {
-    return null;
-  }
-
-  return `[${clock}]`;
-}
-
 module.exports = {
   formatIdleSystemMessage,
-  formatStopTimestamp,
   formatTimingBlock
 };
