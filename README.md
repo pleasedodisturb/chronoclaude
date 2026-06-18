@@ -8,11 +8,23 @@
 > - **[s-a-s-k-i-a/claude-code-timestamps](https://github.com/s-a-s-k-i-a/claude-code-timestamps)** (MIT) — the retrospective `/timestamps` transcript timeline.
 > - **[zoharbabin/claude-code-message-timestamps](https://github.com/zoharbabin/claude-code-message-timestamps)** (MIT) — the visible per-message `[HH:MM:SS]` marker via the `MessageDisplay` hook.
 
-![Annotated ChronoClaude session: a terminal showing the message timestamp, idle note, hidden timing block, tool timeline and statusline, with a colour-coded legend mapping each of the seven surfaces to its CLAUDE_TIMING_* flag](docs/screenshots/features-overview.png)
+**Every surface at a glance** — one real session, with each chronoclaude surface marked:
 
-<sub>↑ The per-surface colours are **illustrative** — a legend to tell the seven surfaces apart. Here's how it **actually looks** out of the box (only the `[HH:MM:SS]` marker is coloured — grey by default, set via `CLAUDE_TIMING_MESSAGE_DISPLAY_COLOR`):</sub>
+![Annotated ChronoClaude session: a terminal showing the message timestamp, idle note, hidden timing block, tool timeline, MCP time tools, /timestamps and statusline, each marked with a numbered badge](docs/screenshots/features-overview.png)
 
-![The same ChronoClaude session in its real default appearance: grey [HH:MM:SS] markers, a dim idle note and statusline, normal message text, no per-surface colours](docs/screenshots/default-render.png)
+| | Surface | What you see | Flag |
+|---|---|---|---|
+| 🔵 **1** | Message timestamp | `[HH:MM:SS]` on every assistant reply | `CLAUDE_TIMING_MESSAGE_DISPLAY` |
+| 🟣 **2** | Idle note | `[after 5m 2s]` when you return after >10s | `CLAUDE_TIMING_IDLE_NOTE` |
+| 🟡 **3** | Passive timing block | hidden `[timing]` context Claude reads each prompt | `CLAUDE_TIMING_PASSIVE` |
+| 🟢 **4** | Tool timeline | auto-logs tool calls to a per-session JSONL | `CLAUDE_TIMING_TIMELINE` |
+| 🟠 **5** | Statusline fragment | live clock + elapsed-since-last-reply | statusline (opt-in) |
+| 🟤 **6** | MCP time server | `get_time` · `time_diff` · `mark_event` · `get_timeline` | `.mcp.json` |
+| 🔴 **7** | `/timestamps` | retrospective wall-clock timeline of the session | slash command |
+
+> The badge colours above are **illustrative** — a legend to tell the surfaces apart. Only the `[HH:MM:SS]` marker's colour is actually configurable (`CLAUDE_TIMING_MESSAGE_DISPLAY_COLOR`, default grey). Here's how it **really looks** out of the box (shown in the Catppuccin Mocha terminal theme):
+
+![The same ChronoClaude session in its real default appearance — grey [HH:MM:SS] markers, a dim idle note and statusline, themed message text, no per-surface colours — shown in Catppuccin Mocha](docs/screenshots/default-render.png)
 
 ## Features
 
