@@ -2,96 +2,122 @@
 <!--
   Source mockup for docs/screenshots/features-overview.png — rendered to PNG via
   headless Chrome + ImageMagick trim (see tools-cheatsheet "Programmatic
-  screenshots"). Annotated showcase of every chronoclaude surface, each
-  colour-coded and keyed to its CLAUDE_TIMING_* flag in the legend.
+  screenshots"). A realistic Claude Code session with every chronoclaude surface
+  appearing inline, colour-coded, and keyed to its flag in the legend below.
   Edit this file, then re-render to regenerate the PNG.
 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <style>
-  :root {
-    --bg:#0d0d0d; --win:#181818; --bar:#222; --border:#2d2d2d;
-    --text:#d4d4d4; --muted:#8a8a8a; --dim:#6e7681;
-    --c1:#4fc1ff; /* message timestamp   */
-    --c2:#c586c0; /* idle note           */
-    --c3:#dcb67a; /* passive timing block*/
-    --c4:#89d185; /* tool timeline       */
-    --c5:#569cd6; /* statusline          */
-    --c6:#e8a064; /* MCP time server     */
-    --c7:#f06a7a; /* /timestamps         */
+  :root{
+    --bg:#0d0d0d; --win:#191919; --bar:#232323; --border:#2c2c2c;
+    --text:#d6d6d6; --muted:#8d8d8d; --dim:#6a727d; --white:#f2f2f2;
+    /* softened, still distinct */
+    --c1:#6cb6ff; /* message timestamp   */
+    --c2:#c79bdb; /* idle note           */
+    --c3:#d9b06a; /* passive timing block*/
+    --c4:#8ecf8a; /* tool timeline       */
+    --c5:#5fb3b3; /* statusline          */
+    --c6:#e0986a; /* MCP time server     */
+    --c7:#d97c86; /* /timestamps         */
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);
     font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
-  .page{width:1240px;padding:30px 32px 34px}
-  h1{font-size:21px;margin:0 0 2px;color:#fff;letter-spacing:.01em}
+  .page{width:1360px;padding:34px 36px 30px}
+  h1{font-size:22px;margin:0 0 3px;color:var(--white);letter-spacing:.01em}
   h1 .v{color:var(--muted);font-weight:500;font-size:15px}
   .sub{color:var(--muted);font-size:13px;margin:0 0 20px}
-  .grid{display:flex;gap:24px;align-items:flex-start}
-  /* terminal window */
-  .term{flex:1 1 0;background:var(--win);border:1px solid var(--border);border-radius:11px;overflow:hidden;min-width:0}
-  .termbar{display:flex;align-items:center;gap:7px;padding:10px 14px;background:var(--bar);color:var(--muted);font-size:12px}
+  .sub code{color:var(--dim)}
+  /* terminal */
+  .term{background:var(--win);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .termbar{display:flex;align-items:center;gap:7px;padding:11px 15px;background:var(--bar);color:var(--muted);font-size:12.5px}
   .dot{width:11px;height:11px;border-radius:50%}
   .r{background:#ff5f57}.y{background:#febc2e}.g{background:#28c840}
-  .termbar .t{margin-left:8px}
-  .body{padding:16px 18px;font-family:"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;font-size:13.5px;line-height:1.62;color:var(--text)}
-  .row{display:flex;align-items:flex-start;gap:9px;padding:1px 0}
-  .badge{flex:none;width:19px;height:19px;border-radius:50%;color:#0d0d0d;font-weight:700;
-    font-size:12px;display:flex;align-items:center;justify-content:center;margin-top:1px;
-    font-family:-apple-system,sans-serif}
-  .spacer{width:19px;flex:none}
-  .line{white-space:pre-wrap;word-break:break-word}
-  .muted{color:var(--muted)}.dim{color:var(--dim)}.prompt{color:#fff}
-  .tag{font-size:10.5px;color:var(--muted);font-family:-apple-system,sans-serif;
-    border:1px solid var(--border);border-radius:4px;padding:0 5px;margin-left:6px;vertical-align:1px}
-  .ts1{color:var(--c1)} .ts2{color:var(--c2)} .ts3{color:var(--c3)}
-  .ts4{color:var(--c4)} .ts5{color:var(--c5)}
-  .statusline{border-top:1px solid var(--border);margin-top:8px;padding-top:9px;color:var(--muted)}
+  .termbar .t{margin-left:9px}
+  .body{padding:18px 22px 20px;font-family:"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+    font-size:13.5px;line-height:1.66;color:var(--text)}
+  .row{display:flex;align-items:flex-start;gap:10px;padding:1.5px 0}
+  .badge{flex:none;width:18px;height:18px;border-radius:50%;color:#0d0d0d;font-weight:700;font-size:11px;
+    display:flex;align-items:center;justify-content:center;margin-top:3px;font-family:-apple-system,sans-serif}
+  .sp{width:18px;flex:none}
+  .line{white-space:pre-wrap;word-break:break-word;flex:1;min-width:0}
+  .muted{color:var(--muted)}.dim{color:var(--dim)}.white{color:var(--white)}
+  .user{color:var(--white)}
+  .tool{color:var(--muted)}
+  .tag{font-size:10.5px;color:var(--dim);font-family:-apple-system,sans-serif;
+    border:1px solid var(--border);border-radius:4px;padding:0 6px;margin-left:7px;vertical-align:1.5px}
+  .t1{color:var(--c1)}.t2{color:var(--c2)}.t3{color:var(--c3)}.t4{color:var(--c4)}
+  .t5{color:var(--c5)}.t6{color:var(--c6)}.t7{color:var(--c7)}
+  .sep{border:none;border-top:1px dashed #333;margin:10px 0 2px}
+  .statusrow{margin-top:6px}
+  ul.bul{margin:2px 0 2px 0;padding-left:16px}
+  ul.bul li{margin:0}
+  .tl{color:var(--muted)}
   /* legend */
-  .legend{flex:none;width:392px;background:var(--win);border:1px solid var(--border);border-radius:11px;padding:16px 16px 8px}
-  .legend h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:2px 2px 12px}
-  .leg{display:flex;gap:10px;padding:9px 4px;border-top:1px solid #242424}
-  .leg:first-of-type{border-top:none}
-  .lb{flex:none;width:20px;height:20px;border-radius:50%;color:#0d0d0d;font-weight:700;font-size:12.5px;
-    display:flex;align-items:center;justify-content:center}
-  .lt{flex:1;min-width:0}
-  .lname{color:var(--text);font-size:13.5px;font-weight:600}
-  .ldesc{color:var(--muted);font-size:12px;margin-top:1px}
-  .flag{font-family:"SF Mono",Menlo,monospace;font-size:11.5px;color:var(--dim)}
+  .legend{margin-top:20px}
+  .legend h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:0 0 11px 2px}
+  .legrid{display:grid;grid-template-columns:repeat(4,1fr);gap:11px 22px}
+  .leg{display:flex;gap:9px;align-items:flex-start}
+  .chip{flex:none;width:14px;height:14px;border-radius:50%;margin-top:2px}
+  .lt{min-width:0}
+  .lname{color:var(--text);font-size:13px;font-weight:600}
+  .lname b{font-weight:700}
+  .flag{font-family:"SF Mono",Menlo,monospace;font-size:11px;color:var(--dim);display:block;margin-top:1px}
 </style>
 </head>
 <body>
 <div class="page">
-  <h1>ChronoClaude <span class="v">— every surface at a glance</span></h1>
-  <p class="sub">Each surface is colour-coded to its toggle in the legend. All on by default; disable any with a falsy value (<code>0</code>/<code>off</code>).</p>
-  <div class="grid">
-    <!-- terminal -->
-    <div class="term">
-      <div class="termbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">claude — chronoclaude</span></div>
-      <div class="body">
-        <div class="row"><span class="badge" style="background:var(--c2)">2</span><span class="line"><span class="ts2">[after 5m 2s]</span> <span class="dim">— back after idle</span></span></div>
-        <div class="row"><span class="spacer"></span><span class="line prompt">&gt; refactor the auth module</span></div>
-        <div class="row"><span class="badge" style="background:var(--c3)">3</span><span class="line"><span class="ts3">[timing]</span><span class="tag">hidden · Claude-only</span></span></div>
-        <div class="row"><span class="spacer"></span><span class="line ts3">time=2026-06-18T16:04:19+02:00
-idle_for=302.0s  last_turn=88.2s
+  <h1>ChronoClaude <span class="v">— time awareness for Claude Code, every surface at a glance</span></h1>
+  <p class="sub">A real session below; each numbered marker is a chronoclaude surface, colour-keyed to its <code>CLAUDE_TIMING_*</code> flag in the legend.</p>
+
+  <div class="term">
+    <div class="termbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">claude — ~/src/acme-api</span></div>
+    <div class="body">
+      <div class="row"><span class="badge" style="background:var(--c2)">2</span><span class="line"><span class="t2">[after 12m 4s]</span> <span class="dim">— welcome back</span></span></div>
+      <div class="row"><span class="sp"></span><span class="line user">&gt; the login endpoint 500s when the email has a +alias (e.g. user+test@acme.io) — can you find why?</span></div>
+
+      <div class="row"><span class="badge" style="background:var(--c3)">3</span><span class="line"><span class="t3">[timing]</span><span class="tag">hidden — injected for Claude, never shown to you</span></span></div>
+      <div class="row"><span class="sp"></span><span class="line t3">time=2026-06-18T16:04:19+02:00
+idle_for=724.0s   last_turn=41.8s
 [/timing]</span></div>
-        <div class="row"><span class="badge" style="background:var(--c1)">1</span><span class="line"><span class="ts1">[16:04:27]</span> I'll start by reading the current auth implementation…</span></div>
-        <div class="row"><span class="badge" style="background:var(--c4)">4</span><span class="line muted">● Bash<span class="dim">(npm test)</span><span class="tag">logged to timeline.jsonl</span></span></div>
-        <div class="row"><span class="badge" style="background:var(--c1)">1</span><span class="line"><span class="ts1">[16:05:12]</span> Done — refactored, 12 tests pass.</span></div>
-        <div class="row statusline"><span class="badge" style="background:var(--c5)">5</span><span class="line"><span class="ts5">16:05</span> <span class="dim">·</span> <span class="ts5">⧗ 3m 21s</span> <span class="dim">since last reply</span></span></div>
-      </div>
+
+      <div class="row"><span class="badge" style="background:var(--c1)">1</span><span class="line"><span class="t1">[16:04:27]</span> On it — I'll grep the auth handler and the email validator it calls before guessing.</span></div>
+      <div class="row"><span class="sp"></span><span class="line tool">● Grep<span class="dim">("validateEmail")</span> <span class="t4">→ 3 matches</span><span class="tag" style="border-color:var(--c4)">4 logged → timeline.jsonl</span></span></div>
+      <div class="row"><span class="sp"></span><span class="line tool">● Read<span class="dim">(src/auth/email.ts)</span></span></div>
+
+      <div class="row"><span class="badge" style="background:var(--c1)">1</span><span class="line"><span class="t1">[16:04:58]</span> Found it. The local-part regex is anchored on <span class="dim">[^+]</span>, so any address with a <span class="white">+</span> tag is rejected — and the rejection <span class="white">throws</span> instead of returning 400, which is why you get a 500. Want me to relax the regex and return a clean 400 on bad input?</span></div>
+      <div class="row"><span class="sp"></span><span class="line user">&gt; yes, and add a test for the +alias case</span></div>
+
+      <div class="row"><span class="badge" style="background:var(--c1)">1</span><span class="line"><span class="t1">[16:05:36]</span> Done:</span></div>
+      <div class="row"><span class="sp"></span><span class="line"><ul class="bul"><li>relaxed the local-part regex to allow <span class="dim">+</span></li><li>validator now returns <span class="white">400</span> on invalid input instead of throwing</li><li>added <span class="dim">auth/email.test.ts</span> covering <span class="dim">user+test@acme.io</span></li></ul></span></div>
+      <div class="row"><span class="sp"></span><span class="line tool">● Bash<span class="dim">(npm test)</span><span class="tag" style="border-color:var(--c4)">4 logged → timeline.jsonl</span></span></div>
+      <div class="row"><span class="badge" style="background:var(--c1)">1</span><span class="line"><span class="t1">[16:06:02]</span> All 48 tests pass, including the new +alias case. The fix is a 4-line change in <span class="dim">email.ts</span> plus the test.</span></div>
+
+      <div class="row"><span class="sp"></span><span class="line user">&gt; how long did that take, and show me the timeline</span></div>
+      <div class="row"><span class="badge" style="background:var(--c6)">6</span><span class="line tool">● get_time / time_diff <span class="t6">→ 1m 35s from first reply to green tests</span><span class="tag" style="border-color:var(--c6)">MCP time tools</span></span></div>
+      <div class="row"><span class="badge" style="background:var(--c7)">7</span><span class="line"><span class="t7">/timestamps</span> <span class="dim">— retrospective timeline of this session:</span></span></div>
+      <div class="row"><span class="sp"></span><span class="line tl">  16:04  you     the login endpoint 500s on +alias…
+  16:04  claude  found it — regex rejects '+', throws → 500
+  16:05  you     yes, and add a test
+  16:06  claude  all 48 tests pass</span></div>
+
+      <hr class="sep">
+      <div class="row statusrow"><span class="badge" style="background:var(--c5)">5</span><span class="line"><span class="t5">16:06</span> <span class="dim">·</span> <span class="t5">⧗ 2m 11s</span> <span class="dim">since last reply  ·  acme-api  ·  main ✓</span></span></div>
     </div>
-    <!-- legend -->
-    <div class="legend">
-      <h2>Surfaces &amp; flags</h2>
-      <div class="leg"><span class="lb" style="background:var(--c1)">1</span><div class="lt"><div class="lname">Message timestamp</div><div class="ldesc">visible <code>[HH:MM:SS]</code> on every reply</div><div class="flag">CLAUDE_TIMING_MESSAGE_DISPLAY</div></div></div>
-      <div class="leg"><span class="lb" style="background:var(--c2)">2</span><div class="lt"><div class="lname">Idle note</div><div class="ldesc">visible <code>[after 5m 2s]</code> on re-entry</div><div class="flag">CLAUDE_TIMING_IDLE_NOTE</div></div></div>
-      <div class="leg"><span class="lb" style="background:var(--c3)">3</span><div class="lt"><div class="lname">Passive timing block</div><div class="ldesc">hidden context Claude reads each prompt</div><div class="flag">CLAUDE_TIMING_PASSIVE</div></div></div>
-      <div class="leg"><span class="lb" style="background:var(--c4)">4</span><div class="lt"><div class="lname">Tool timeline</div><div class="ldesc">auto-logs tool calls to per-session JSONL</div><div class="flag">CLAUDE_TIMING_TIMELINE</div></div></div>
-      <div class="leg"><span class="lb" style="background:var(--c5)">5</span><div class="lt"><div class="lname">Statusline fragment</div><div class="ldesc">live clock + elapsed-since-last-reply</div><div class="flag">statusline (opt-in)</div></div></div>
-      <div class="leg"><span class="lb" style="background:var(--c6)">6</span><div class="lt"><div class="lname">MCP time server</div><div class="ldesc">get_time · time_diff · mark_event · get_timeline</div><div class="flag">.mcp.json</div></div></div>
-      <div class="leg"><span class="lb" style="background:var(--c7)">7</span><div class="lt"><div class="lname">/timestamps command</div><div class="ldesc">retrospective wall-clock timeline of the session</div><div class="flag">slash command</div></div></div>
+  </div>
+
+  <div class="legend">
+    <h2>The seven surfaces — all on by default, each toggled by its flag</h2>
+    <div class="legrid">
+      <div class="leg"><span class="chip" style="background:var(--c1)"></span><span class="lt"><span class="lname"><b>1</b> · Message timestamp</span><span class="flag">CLAUDE_TIMING_MESSAGE_DISPLAY</span></span></div>
+      <div class="leg"><span class="chip" style="background:var(--c2)"></span><span class="lt"><span class="lname"><b>2</b> · Idle note</span><span class="flag">CLAUDE_TIMING_IDLE_NOTE</span></span></div>
+      <div class="leg"><span class="chip" style="background:var(--c3)"></span><span class="lt"><span class="lname"><b>3</b> · Passive timing block</span><span class="flag">CLAUDE_TIMING_PASSIVE</span></span></div>
+      <div class="leg"><span class="chip" style="background:var(--c4)"></span><span class="lt"><span class="lname"><b>4</b> · Tool timeline</span><span class="flag">CLAUDE_TIMING_TIMELINE</span></span></div>
+      <div class="leg"><span class="chip" style="background:var(--c5)"></span><span class="lt"><span class="lname"><b>5</b> · Statusline fragment</span><span class="flag">statusline · opt-in</span></span></div>
+      <div class="leg"><span class="chip" style="background:var(--c6)"></span><span class="lt"><span class="lname"><b>6</b> · MCP time server</span><span class="flag">.mcp.json · get_time, time_diff, mark_event, get_timeline</span></span></div>
+      <div class="leg"><span class="chip" style="background:var(--c7)"></span><span class="lt"><span class="lname"><b>7</b> · /timestamps command</span><span class="flag">slash command</span></span></div>
     </div>
   </div>
 </div>
