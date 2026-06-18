@@ -8,7 +8,7 @@
 > - **[s-a-s-k-i-a/claude-code-timestamps](https://github.com/s-a-s-k-i-a/claude-code-timestamps)** (MIT) — the retrospective `/timestamps` transcript timeline.
 > - **[zoharbabin/claude-code-message-timestamps](https://github.com/zoharbabin/claude-code-message-timestamps)** (MIT) — the visible per-message `[HH:MM:SS]` marker via the `MessageDisplay` hook.
 
-![Idle note on re-entry plus a live statusline timer tracking elapsed time since Claude's last reply](docs/screenshots/hero.png)
+![Annotated ChronoClaude session: a terminal showing the message timestamp, idle note, hidden timing block, tool timeline and statusline, with a colour-coded legend mapping each of the seven surfaces to its CLAUDE_TIMING_* flag](docs/screenshots/features-overview.png)
 
 ## Features
 
