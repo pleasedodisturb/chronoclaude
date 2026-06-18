@@ -14,8 +14,8 @@
 
 | Surface | What you get | Visible? | Toggle (default on) |
 |---|---|---|---|
-| Visible message timestamp | grey `[HH:MM:SS]` prepended to each assistant message (needs Claude Code 2.1.152+, terminal TUI — see note) | visible, always | `CLAUDE_TIMING_MESSAGE_DISPLAY` |
-| Per-turn timestamp note | `[HH:MM:SS]` system note after each reply — **IDE-extension workaround**, off by default | visible, per turn | `CLAUDE_TIMING_STOP_TIMESTAMP` (opt-in) |
+| Visible message timestamp | grey `[HH:MM:SS]` prepended to each assistant message (needs Claude Code 2.1.152+; colour auto-suppressed to plain in IDE panels — see note) | visible, always | `CLAUDE_TIMING_MESSAGE_DISPLAY` |
+| Per-turn timestamp note | `[HH:MM:SS]` system note after each reply — **fallback for IDE panels that don't fire `MessageDisplay`**, off by default | visible, per turn | `CLAUDE_TIMING_STOP_TIMESTAMP` (opt-in) |
 | Passive timing block | hidden `[timing]` block (`time`, `idle_for`, `last_turn`) Claude reads each prompt | hidden | `CLAUDE_TIMING_PASSIVE` |
 | Idle note | `[after 5m 2s]` when you return after >10s idle | visible, on idle | `CLAUDE_TIMING_IDLE_NOTE` |
 | Tool timeline | auto-logs tool calls; queryable via the MCP `get_timeline` tool | hidden (disk) | `CLAUDE_TIMING_TIMELINE` |
@@ -27,9 +27,12 @@ Toggle any surface from the `env` block of `~/.claude/settings.json`, or run `/c
 
 ### Using an IDE extension (VS Code / JetBrains)?
 
-The inline `[HH:MM:SS]` message timestamp rides the `MessageDisplay` hook, which **the VS Code and JetBrains extension panels do not currently fire** (confirmed VS Code on Windows 11, Claude Code 2.1.165) — it works only in the terminal TUI. Every other surface works in the extensions.
+The inline `[HH:MM:SS]` message timestamp rides the `MessageDisplay` hook. Two things to know in the extension panels:
 
-If you want a visible per-message timestamp inside an IDE panel, enable the workaround surface, which rides the `Stop` hook (which the panels *do* fire) and emits a `[HH:MM:SS]` system note after each reply:
+- **Colour is auto-suppressed in panels.** The panels render the assistant message as rich text and show raw ANSI/SGR escapes as literal `[90m…[0m` junk instead of colour. ChronoClaude detects the non-terminal client (via `CLAUDE_CODE_ENTRYPOINT`) and emits a plain `[HH:MM:SS]` marker there automatically — no config needed. Colour still applies in the terminal TUI.
+- **Older extensions may not fire `MessageDisplay` at all.** It works in current builds (e.g. Claude Code 2.1.181), but didn't fire in some earlier ones (reported on 2.1.165). If you see no timestamp at all in your panel, enable the fallback below.
+
+**Fallback for panels that don't fire `MessageDisplay`** — enable the opt-in `Stop`-hook note, which rides a hook the panels *do* fire and emits a `[HH:MM:SS]` system note after each reply:
 
 ```json
 {
@@ -39,7 +42,7 @@ If you want a visible per-message timestamp inside an IDE panel, enable the work
 }
 ```
 
-It's off by default so terminal users — who already get the inline marker — aren't double-stamped. In an IDE panel you can leave `CLAUDE_TIMING_MESSAGE_DISPLAY` on (it simply no-ops there) or set it to `0`. The note uses the same `systemMessage` channel as the idle note (`[after 5m 2s]`); if you can see the idle note in your panel, this note will render too.
+It's off by default so users who already get the inline marker (terminal, or a current extension) aren't double-stamped. The note uses the same `systemMessage` channel as the idle note (`[after 5m 2s]`); if you can see the idle note in your panel, this note will render too.
 
 The visible message timestamp is grey by default. Recolour it with `CLAUDE_TIMING_MESSAGE_DISPLAY_COLOR` — a named colour (`grey`, `dim`, `cyan`, …), a raw SGR sequence (`1;90`), or `none` to disable colour. Only the `[HH:MM:SS]` marker is coloured; your message text is never touched.
 

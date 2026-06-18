@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Visible message timestamp leaked raw ANSI codes in IDE extension panels.** The grey `[HH:MM:SS]` marker emitted SGR colour escapes that the VS Code / JetBrains panels render as literal `[90m…[0m` text instead of colour (the terminal TUI renders them fine). ChronoClaude now detects non-terminal clients via `CLAUDE_CODE_ENTRYPOINT` (`cli` ⇒ terminal; `claude-vscode`, `remote*`, … ⇒ panel/remote) and emits a plain `[HH:MM:SS]` marker there automatically — colour still applies in the terminal. Surfaced while testing anthropics/claude-code#44763 against Claude Code 2.1.181, where (unlike the 2.1.165 the issue was filed against) `MessageDisplay` *does* fire in the VS Code panel.
+
 ### Added
 - **IDE-extension workaround for the visible per-message timestamp** (`CLAUDE_TIMING_STOP_TIMESTAMP`, opt-in / off by default). The inline `[HH:MM:SS]` marker rides the `MessageDisplay` hook, which the VS Code and JetBrains extension panels do not currently fire (confirmed VS Code on Windows 11, Claude Code 2.1.165) — it works only in the terminal TUI. The new toggle makes the `Stop` hook emit a per-turn `[HH:MM:SS]` `systemMessage` (a channel the panels *do* fire, the same one the idle note uses), so IDE-panel users still get a visible per-message timestamp. Off by default so terminal users — who already get the inline marker — aren't double-stamped. This is the first **opt-in** surface (off unless set to a truthy value `1`/`true`/`on`/`yes`); all other surfaces remain on-by-default. Reported in anthropics/claude-code#44763.
 

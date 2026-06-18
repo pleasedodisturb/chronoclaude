@@ -4,6 +4,7 @@ const {
   isEnabled,
   SURFACES,
   OPT_IN_SURFACES,
+  terminalSupportsAnsi,
   messageDisplayColorCode
 } = require('../src/config');
 
@@ -76,6 +77,23 @@ test('opt-in surfaces stay off for falsy or unrecognized values', () => {
       isEnabled('stopTimestamp', { CLAUDE_TIMING_STOP_TIMESTAMP: value }),
       false,
       `expected off for ${JSON.stringify(value)}`
+    );
+  }
+});
+
+test('terminalSupportsAnsi is true for the cli entrypoint and when unset', () => {
+  assert.equal(terminalSupportsAnsi({ CLAUDE_CODE_ENTRYPOINT: 'cli' }), true);
+  assert.equal(terminalSupportsAnsi({ CLAUDE_CODE_ENTRYPOINT: 'CLI' }), true);
+  assert.equal(terminalSupportsAnsi({}), true);
+  assert.equal(terminalSupportsAnsi({ CLAUDE_CODE_ENTRYPOINT: '' }), true);
+});
+
+test('terminalSupportsAnsi is false for GUI/remote entrypoints (no ANSI in panel)', () => {
+  for (const entrypoint of ['claude-vscode', 'remote', 'remote_mobile', 'mcp', 'claude-in-teams']) {
+    assert.equal(
+      terminalSupportsAnsi({ CLAUDE_CODE_ENTRYPOINT: entrypoint }),
+      false,
+      `expected no ANSI for ${entrypoint}`
     );
   }
 });

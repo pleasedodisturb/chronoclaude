@@ -11,7 +11,14 @@ const RESET = '\x1b[0m';
 function run(input, extraEnv = {}) {
   return execFileSync('node', [SCRIPT_PATH], {
     input: typeof input === 'string' ? input : JSON.stringify(input),
-    env: { ...process.env, CLAUDE_TIMING_NOW_ISO: FIXED_NOW, ...extraEnv },
+    env: {
+      ...process.env,
+      CLAUDE_TIMING_NOW_ISO: FIXED_NOW,
+      // Pin the terminal entrypoint so colour assertions are deterministic
+      // regardless of where the suite runs (the runner may itself be in VS Code).
+      CLAUDE_CODE_ENTRYPOINT: 'cli',
+      ...extraEnv
+    },
     timeout: 5000,
     encoding: 'utf8',
     stdio: ['pipe', 'pipe', 'ignore']
@@ -107,5 +114,28 @@ test('none/off/plain disables colour — bare marker, no escape codes', () => {
 
 test('unknown colour value falls back to default grey (never breaks)', () => {
   const out = run({ index: 0, delta: 'Hi' }, { CLAUDE_TIMING_MESSAGE_DISPLAY_COLOR: 'chartreuse' });
+  assert.equal(JSON.parse(out).hookSpecificOutput.displayContent, `${GREY}[14:05:09]${RESET} Hi`);
+});
+
+test('suppresses colour in the VS Code panel (entrypoint claude-vscode) — plain marker, no SGR leak', () => {
+  const out = run({ index: 0, delta: 'Hello' }, { CLAUDE_CODE_ENTRYPOINT: 'claude-vscode' });
+  const { displayContent } = JSON.parse(out).hookSpecificOutput;
+
+  // The exact bug from anthropics/claude-code#44763: no `[90m`/`[0m` leak on screen.
+  assert.equal(displayContent, '[14:05:09] Hello');
+  assert.equal(displayContent.includes('\x1b'), false, 'no escape bytes in a GUI panel');
+});
+
+test('suppresses colour for any non-cli entrypoint (e.g. remote), even with an explicit colour set', () => {
+  const out = run(
+    { index: 0, delta: 'Hi' },
+    { CLAUDE_CODE_ENTRYPOINT: 'remote', CLAUDE_TIMING_MESSAGE_DISPLAY_COLOR: 'cyan' }
+  );
+  // ANSI never renders on these surfaces, so an explicit colour is suppressed too.
+  assert.equal(JSON.parse(out).hookSpecificOutput.displayContent, '[14:05:09] Hi');
+});
+
+test('still colours when the entrypoint is unset (assume terminal — preserves default)', () => {
+  const out = run({ index: 0, delta: 'Hi' }, { CLAUDE_CODE_ENTRYPOINT: '' });
   assert.equal(JSON.parse(out).hookSpecificOutput.displayContent, `${GREY}[14:05:09]${RESET} Hi`);
 });

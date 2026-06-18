@@ -78,6 +78,27 @@ function messageDisplayColorCode(env = process.env) {
   return DEFAULT_MESSAGE_DISPLAY_COLOR;
 }
 
+// SGR colour in the MessageDisplay `displayContent` only renders in the real
+// terminal TUI. GUI/remote clients (VS Code / JetBrains extension panels, web,
+// mobile, etc.) display the raw escape codes as literal text — e.g. a grey
+// marker leaks as `[90m[12:34:56][0m` on screen. The host advertises the client
+// via `CLAUDE_CODE_ENTRYPOINT` (`cli` for the terminal; `claude-vscode`,
+// `remote*`, … for everything else — see Claude Code's entrypoint switch). We
+// only emit colour when we're confident the surface renders ANSI: entrypoint
+// `cli`, or unset (covers the test harness and preserves the historical grey
+// default). Any other value → plain marker, no escape codes.
+const TERMINAL_ENTRYPOINTS = new Set(['cli']);
+
+function terminalSupportsAnsi(env = process.env) {
+  const entrypoint = (env.CLAUDE_CODE_ENTRYPOINT || '').trim().toLowerCase();
+
+  if (!entrypoint) {
+    return true; // unset → assume terminal (keeps the default-grey behavior)
+  }
+
+  return TERMINAL_ENTRYPOINTS.has(entrypoint);
+}
+
 function isEnabled(key, env = process.env) {
   const varName = SURFACES[key];
 
@@ -103,5 +124,6 @@ module.exports = {
   SURFACES,
   OPT_IN_SURFACES,
   isEnabled,
+  terminalSupportsAnsi,
   messageDisplayColorCode
 };
