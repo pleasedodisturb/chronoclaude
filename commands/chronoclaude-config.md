@@ -12,8 +12,8 @@ Surfaces and their environment variables (each defaults to **on**; a surface is 
 | Surface | What it does | Visible? | Env var |
 |---|---|---|---|
 | Passive timing block | Hidden `[timing]` block (local time, idle gap, last-turn duration) injected each prompt | hidden (Claude only) | `CLAUDE_TIMING_PASSIVE` |
-| Idle note | Visible `[after 5m 2s]` message when you return after >10s idle | visible (on idle) | `CLAUDE_TIMING_IDLE_NOTE` |
-| Message timestamp | Visible `[HH:MM:SS]` prefix on every assistant message (needs Claude Code 2.1.152+) | visible (always) | `CLAUDE_TIMING_MESSAGE_DISPLAY` |
+| Idle note | Visible `[after 5m 2s]` message when you return after >10s idle (terminal TUI; the VS Code panel does not render hook `systemMessage`) | visible (on idle) | `CLAUDE_TIMING_IDLE_NOTE` |
+| Message timestamp | Visible `[HH:MM:SS]` prefix on every assistant message (needs Claude Code 2.1.152+; colour auto-suppressed to plain in the VS Code panel, where raw ANSI would leak as `[90m…[0m`) | visible (always) | `CLAUDE_TIMING_MESSAGE_DISPLAY` |
 | Tool timeline | Auto-logs tool calls to a per-session JSONL the MCP `get_timeline` tool can read | hidden (disk) | `CLAUDE_TIMING_TIMELINE` |
 
 Steps:

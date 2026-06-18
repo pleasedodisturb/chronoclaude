@@ -1,6 +1,11 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { isEnabled, SURFACES, messageDisplayColorCode } = require('../src/config');
+const {
+  isEnabled,
+  SURFACES,
+  terminalSupportsAnsi,
+  messageDisplayColorCode
+} = require('../src/config');
 
 test('isEnabled defaults to true when the env var is unset', () => {
   assert.equal(isEnabled('passive', {}), true);
@@ -43,6 +48,23 @@ test('SURFACES maps the four surfaces to CLAUDE_TIMING_* variables', () => {
 
   for (const varName of Object.values(SURFACES)) {
     assert.match(varName, /^CLAUDE_TIMING_/);
+  }
+});
+
+test('terminalSupportsAnsi is true for the cli entrypoint and when unset', () => {
+  assert.equal(terminalSupportsAnsi({ CLAUDE_CODE_ENTRYPOINT: 'cli' }), true);
+  assert.equal(terminalSupportsAnsi({ CLAUDE_CODE_ENTRYPOINT: 'CLI' }), true);
+  assert.equal(terminalSupportsAnsi({}), true);
+  assert.equal(terminalSupportsAnsi({ CLAUDE_CODE_ENTRYPOINT: '' }), true);
+});
+
+test('terminalSupportsAnsi is false for GUI/remote entrypoints (no ANSI in panel)', () => {
+  for (const entrypoint of ['claude-vscode', 'remote', 'remote_mobile', 'mcp', 'claude-in-teams']) {
+    assert.equal(
+      terminalSupportsAnsi({ CLAUDE_CODE_ENTRYPOINT: entrypoint }),
+      false,
+      `expected no ANSI for ${entrypoint}`
+    );
   }
 });
 

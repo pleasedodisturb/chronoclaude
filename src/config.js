@@ -64,6 +64,37 @@ function messageDisplayColorCode(env = process.env) {
   return DEFAULT_MESSAGE_DISPLAY_COLOR;
 }
 
+// SGR colour in the MessageDisplay `displayContent` only renders on surfaces
+// that interpret ANSI. Rich-text chat panels do not: the VS Code extension
+// panel renders the assistant message as formatted text and shows the raw
+// escapes as literal `[90m[12:34:56][0m` junk (confirmed, anthropics/claude-code
+// #44763). The host advertises the surface via `CLAUDE_CODE_ENTRYPOINT` — values
+// taken from Claude Code's own entrypoint switch: `cli` (terminal TUI),
+// `claude-vscode` (VS Code chat panel), `remote*`, `mcp`, `sdk-*`, etc.
+//
+// Rule: emit colour only for `cli` or unset; plain marker otherwise.
+//   - VS Code chat panel → `claude-vscode` → plain (fixes the leak).
+//   - Terminal TUI, and VS Code's *integrated terminal* → `cli` → colour.
+//   - JetBrains: its integration runs the CLI inside the IDE's terminal tool
+//     window (a real ANSI terminal — cf. `isJetBrainsIdeTerminal` in the CC
+//     binary), so it reports `cli` and colour renders fine. Inferred, not yet
+//     tested end-to-end, but safe either way: the only colour branch requires
+//     an ANSI-capable `cli` surface, so a distinct/non-cli entrypoint would just
+//     fall through to plain.
+//   - unset → assume terminal (covers the test harness; preserves the grey
+//     default). Any other value → plain, no escape codes.
+const TERMINAL_ENTRYPOINTS = new Set(['cli']);
+
+function terminalSupportsAnsi(env = process.env) {
+  const entrypoint = (env.CLAUDE_CODE_ENTRYPOINT || '').trim().toLowerCase();
+
+  if (!entrypoint) {
+    return true; // unset → assume terminal (keeps the default-grey behavior)
+  }
+
+  return TERMINAL_ENTRYPOINTS.has(entrypoint);
+}
+
 function isEnabled(key, env = process.env) {
   const varName = SURFACES[key];
 
@@ -83,5 +114,6 @@ function isEnabled(key, env = process.env) {
 module.exports = {
   SURFACES,
   isEnabled,
+  terminalSupportsAnsi,
   messageDisplayColorCode
 };

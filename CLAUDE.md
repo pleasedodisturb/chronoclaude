@@ -31,6 +31,8 @@ Plus a statusline fragment (`scripts/statusline-fragment.js`) and a PostToolUse 
 
 `src/config.js` exposes `isEnabled(key, env)` and a `SURFACES` map. Each user-facing surface is gated by a `CLAUDE_TIMING_*` env var, **on by default**, disabled only by an explicit falsy value (`0`/`false`/`off`/`no`): `CLAUDE_TIMING_PASSIVE`, `CLAUDE_TIMING_IDLE_NOTE`, `CLAUDE_TIMING_MESSAGE_DISPLAY`, `CLAUDE_TIMING_TIMELINE`. Toggles gate only emitted **output** — `Stop`/`PreCompact` and state writes always run so the shared state stays coherent for whichever surfaces are on. The `/chronoclaude-config` command reports state and prints a paste-ready snippet.
 
+`src/config.js` also exposes `terminalSupportsAnsi(env)`: the visible `MessageDisplay` marker is coloured (default grey) only when `CLAUDE_CODE_ENTRYPOINT` is `cli` or unset. GUI/remote clients (`claude-vscode`, `remote*`, …) render raw SGR escapes as literal `[90m…[0m` text, so colour is auto-suppressed there to a plain `[HH:MM:SS]`. Empirically the VS Code chat panel also does **not** render hook `systemMessage` output at all (the idle note doesn't show there) — only `MessageDisplay` does; keep that in mind before building any user-visible surface on `systemMessage`.
+
 ### Hook lifecycle
 
 The state file's `lastStopAt` field is the load-bearing signal:
