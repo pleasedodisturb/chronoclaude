@@ -4,10 +4,18 @@
  * Per-surface on/off toggles.
  *
  * Each user-facing surface can be disabled independently via an environment
- * variable. Surfaces are ON by default — a surface is only disabled when its
- * variable is explicitly set to a falsy value (`0`, `false`, `off`, `no`,
+ * variable. Most surfaces are ON by default — disabled only when their variable
+ * is explicitly set to a falsy value (`0`, `false`, `off`, `no`,
  * case-insensitive). Unknown/unset variables leave the surface on, so a typo
  * never silently suppresses output.
+ *
+ * A small set of surfaces are *opt-in* (OFF by default, see `OPT_IN_SURFACES`):
+ * they only turn on for an explicit truthy value (`1`, `true`, `on`, `yes`).
+ * These are workarounds that would otherwise duplicate another surface — e.g.
+ * `stopTimestamp` emits a per-turn `[HH:MM:SS]` note for IDE-extension panels
+ * (VSCode/JetBrains) where the inline `MessageDisplay` marker never fires;
+ * leaving it on by default would double-stamp every turn in the terminal TUI,
+ * which already gets the inline marker.
  *
  * Env-var driven (not a config file) to match the existing `CLAUDE_TIMING_*`
  * idiom (see `src/time.js` `CLAUDE_TIMING_NOW_ISO`) and to stay trivially
@@ -18,10 +26,16 @@ const SURFACES = {
   passive: 'CLAUDE_TIMING_PASSIVE',
   idleNote: 'CLAUDE_TIMING_IDLE_NOTE',
   messageDisplay: 'CLAUDE_TIMING_MESSAGE_DISPLAY',
-  timeline: 'CLAUDE_TIMING_TIMELINE'
+  timeline: 'CLAUDE_TIMING_TIMELINE',
+  stopTimestamp: 'CLAUDE_TIMING_STOP_TIMESTAMP'
 };
 
+// Surfaces that are OFF by default and require an explicit truthy value to
+// enable (the inverse of the default-on surfaces above).
+const OPT_IN_SURFACES = new Set(['stopTimestamp']);
+
 const OFF_VALUES = new Set(['0', 'false', 'off', 'no']);
+const ON_VALUES = new Set(['1', 'true', 'on', 'yes']);
 
 // Named colours → SGR code for the visible MessageDisplay marker.
 const COLOR_CODES = {
@@ -72,16 +86,22 @@ function isEnabled(key, env = process.env) {
   }
 
   const raw = env[varName];
+  const optIn = OPT_IN_SURFACES.has(key);
 
   if (raw === undefined || raw === null || raw === '') {
-    return true;
+    return !optIn; // default-on surfaces → on; opt-in surfaces → off
   }
 
-  return !OFF_VALUES.has(String(raw).trim().toLowerCase());
+  const value = String(raw).trim().toLowerCase();
+
+  // Opt-in surfaces turn on ONLY for an explicit truthy value; default-on
+  // surfaces turn off ONLY for an explicit falsy value.
+  return optIn ? ON_VALUES.has(value) : !OFF_VALUES.has(value);
 }
 
 module.exports = {
   SURFACES,
+  OPT_IN_SURFACES,
   isEnabled,
   messageDisplayColorCode
 };
