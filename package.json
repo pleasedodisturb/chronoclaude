@@ -1,7 +1,7 @@
 {
   "name": "chronoclaude",
   "private": true,
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Claude Code time-awareness plugin: visible per-message timestamps, hidden timing context, idle notes, an MCP time server, and a /timestamps timeline.",
   "license": "MIT",
   "scripts": {

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.3] - 2026-06-18
+
 ### Fixed
 - **Visible message timestamp leaked raw ANSI codes in the VS Code extension panel.** The grey `[HH:MM:SS]` marker emitted SGR colour escapes that the VS Code chat panel renders as literal `[90m…[0m` text instead of colour (the terminal TUI renders them fine). ChronoClaude now detects non-terminal clients via `CLAUDE_CODE_ENTRYPOINT` (`cli` ⇒ terminal; `claude-vscode`, `remote*`, … ⇒ panel/remote) and emits a plain `[HH:MM:SS]` marker there automatically — colour still applies in the terminal. Surfaced and verified in the VS Code panel while testing anthropics/claude-code#44763 against Claude Code 2.1.181, where (unlike the 2.1.165 the issue was filed against) `MessageDisplay` *does* fire in the panel.
 
