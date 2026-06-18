@@ -26,6 +26,8 @@ Toggle any surface from the `env` block of `~/.claude/settings.json`, or run `/c
 
 ### Using an IDE extension (VS Code / JetBrains)?
 
+![Before v0.5.2 the grey timestamp leaked raw ANSI as literal [90m…[0m in the VS Code panel; after v0.5.3 it renders as a clean plain [HH:MM:SS]](docs/screenshots/vscode-timestamp.png)
+
 The inline `[HH:MM:SS]` message timestamp rides the `MessageDisplay` hook. Two things to know in the extension panels:
 
 - **Colour is auto-suppressed in the VS Code chat panel.** That panel renders the assistant message as rich text and shows raw ANSI/SGR escapes as literal `[90m…[0m` junk instead of colour. ChronoClaude detects the non-terminal client (via `CLAUDE_CODE_ENTRYPOINT=claude-vscode`) and emits a plain `[HH:MM:SS]` marker there automatically — no config needed. Colour still applies in any real terminal, including VS Code's *integrated terminal* and the JetBrains terminal tool window (where the CLI runs as a normal ANSI terminal). *(VS Code panel confirmed; JetBrains is inferred from its terminal-based integration, not yet tested end-to-end.)*
