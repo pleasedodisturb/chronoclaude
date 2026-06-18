@@ -1,0 +1,97 @@
+<!doctype html>
+<!--
+  Source mockup for docs/screenshots/vscode-timestamp.png — rendered to PNG via
+  Playwright (see RELEASING/docs notes). Faithful recreation of the VS Code
+  Claude chat panel showing the v0.5.3 fix: the per-message [HH:MM:SS] marker
+  before (raw ANSI leaks as literal text) and after (clean plain marker).
+  Edit this file, then re-render to regenerate the PNG.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  :root {
+    --bg: #1f1f1f;
+    --panel: #181818;
+    --text: #cccccc;
+    --muted: #8a8a8a;
+    --dim: #6e7681;
+    --code-bg: #2a2a2a;
+    --leak: #e06c75;
+    --ok: #3fb950;
+    --border: #2d2d2d;
+    --accent: #4a9eff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #0d0d0d;
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { display: flex; gap: 20px; padding: 28px; width: 1180px; }
+  .col { flex: 1; }
+  .cap {
+    font-size: 13px; font-weight: 600; letter-spacing: .02em;
+    margin: 0 0 10px 2px; display: flex; align-items: center; gap: 8px;
+  }
+  .cap .v { color: var(--muted); font-weight: 500; }
+  .cap.before { color: var(--leak); }
+  .cap.after { color: var(--ok); }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 18px 20px;
+    height: 100%;
+  }
+  .titlebar {
+    display: flex; align-items: center; gap: 7px;
+    padding-bottom: 14px; margin-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted); font-size: 12px;
+  }
+  .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .dot.r { background: #ff5f57; } .dot.y { background: #febc2e; } .dot.g { background: #28c840; }
+  .titlebar .name { margin-left: 8px; }
+  .msg { display: flex; gap: 10px; font-size: 14.5px; line-height: 1.55; color: var(--text); }
+  .bullet { color: var(--accent); margin-top: 2px; }
+  .body { flex: 1; }
+  .mono { font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+  .ts-clean { color: var(--dim); }
+  .ts-leak  { color: var(--leak); }
+  .leak-note, .clean-note {
+    margin-top: 16px; font-size: 12.5px; padding: 9px 12px; border-radius: 7px;
+  }
+  .leak-note  { background: rgba(224,108,117,.10); color: #e8a5ab; border: 1px solid rgba(224,108,117,.25); }
+  .clean-note { background: rgba(63,185,80,.10);  color: #8dd39a; border: 1px solid rgba(63,185,80,.25); }
+  .leak-note code, .clean-note code { font-family: "SF Mono", Menlo, monospace; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="col">
+      <p class="cap before">● Before <span class="v">— v0.5.2, VS&nbsp;Code panel</span></p>
+      <div class="panel">
+        <div class="titlebar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="name">Claude</span></div>
+        <div class="msg">
+          <span class="bullet">●</span>
+          <div class="body"><span class="mono ts-leak">[90m[14:07:58][0m</span> Both workers are active — gc-694 finished, gc-695 still running.</div>
+        </div>
+        <div class="leak-note">The grey colour was sent as ANSI escapes; the panel renders them as literal <code>[90m…[0m</code> text.</div>
+      </div>
+    </div>
+    <div class="col">
+      <p class="cap after">● After <span class="v">— v0.5.3, VS&nbsp;Code panel</span></p>
+      <div class="panel">
+        <div class="titlebar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="name">Claude</span></div>
+        <div class="msg">
+          <span class="bullet">●</span>
+          <div class="body"><span class="mono ts-clean">[14:07:58]</span> Both workers are active — gc-694 finished, gc-695 still running.</div>
+        </div>
+        <div class="clean-note">Colour auto-suppressed on non-terminal clients — a clean plain <code>[HH:MM:SS]</code> marker. (Colour still applies in real terminals.)</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
