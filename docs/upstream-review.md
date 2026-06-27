@@ -37,7 +37,7 @@ Reviewed at **7 commits, no tagged releases, 0 open issues**.
 | Upstream change | Disposition | Why |
 |---|---|---|
 | Resolve the transcript by matching the working directory recorded *inside* each transcript, not by reconstructing the `~/.claude/projects/<dir>` folder name (which breaks on paths with dots/spaces) | **ADOPTED** | We had the exact bug: `commands/timestamps.md` reconstructed the folder name with `pwd \| sed 's\|/\|-\|g'`, which only rewrites `/`. `parse-transcript.py` now takes `--cwd` and matches the `cwd` field Claude Code stamps on every entry. See PR #24 / `CHANGELOG` `[Unreleased]`. |
-| Zero-token `timeline.sh` (run the parser straight from the shell, bypassing the model entirely) | **Deferred** | Our `/timestamps` already runs on the `haiku` model, so it's cheap; a user-run shell script is a different usage mode and a new maintained surface. Low priority — revisit if there's demand for a truly zero-token path. |
+| Zero-token `timeline.sh` (run the parser straight from the shell, bypassing the model entirely) | **Adopted** | Added `scripts/timeline.sh`, a thin wrapper that runs `parse-transcript.py --cwd "$PWD"` directly from the shell — a truly zero-token path alongside the `haiku`-backed `/timestamps`. (Initially deferred in this review; built immediately after on maintainer request.) |
 
 ### zoharbabin/claude-code-message-timestamps — visible `[HH:MM:SS]` marker (MIT)
 

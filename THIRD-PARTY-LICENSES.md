@@ -10,11 +10,14 @@ which its author released into the public domain (dual Unlicense / CC0 1.0
 Universal). The public-domain dedication permits redistribution of derivative
 work under MIT; the original is credited here for provenance.
 
-## `scripts/parse-transcript.py` — retrospective `/timestamps` mode
+## `scripts/parse-transcript.py` and `scripts/timeline.sh` — retrospective `/timestamps` mode
 
 Adapted from
 **[s-a-s-k-i-a/claude-code-timestamps](https://github.com/s-a-s-k-i-a/claude-code-timestamps)**,
-licensed under the MIT License:
+licensed under the MIT License. `parse-transcript.py` renders the transcript
+timeline and locates the session by the working directory recorded inside the
+transcript; `timeline.sh` is the zero-token shell wrapper that runs it directly
+from the shell without the model, mirroring the upstream's `timeline.sh`.
 
 ```
 MIT License
