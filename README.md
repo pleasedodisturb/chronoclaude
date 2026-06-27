@@ -128,6 +128,19 @@ Flags:
 - `--clock` — also print the current local time (`HH:MM`). Renders even when there's no elapsed time yet, so the plugin can own your statusline clock instead of a separate `date` call.
 - `--clock-position before|after` — place the clock before (default) or after the elapsed timer when both are shown, e.g. `14:05 3m 21s` vs `3m 21s 14:05`.
 
+## Zero-token timeline (optional)
+
+`/timestamps` runs on a small model, but you can get the same timeline with **zero tokens** by running the parser straight from your shell — no Claude Code turn involved:
+
+```bash
+bash scripts/timeline.sh        # last 20 messages
+bash scripts/timeline.sh 50     # last 50
+```
+
+Run it from the project directory whose session you want to inspect. It finds the right transcript by matching the working directory recorded inside Claude Code's transcript files, so it works from any project path — including ones containing dots or spaces.
+
+(The zero-token shell-wrapper idea comes from [s-a-s-k-i-a/claude-code-timestamps](https://github.com/s-a-s-k-i-a/claude-code-timestamps); see [`THIRD-PARTY-LICENSES.md`](./THIRD-PARTY-LICENSES.md).)
+
 ## Local Usage
 
 Run Claude Code with the plugin from this repo root:
