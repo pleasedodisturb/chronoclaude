@@ -113,3 +113,93 @@ test('parse-transcript rejects paths outside ~/.claude/projects/', () => {
 
   fs.unlinkSync(tmpFile);
 });
+
+function createTranscriptWithCwd(dirName, fileName, cwd, lines) {
+  // The project folder name is deliberately unrelated to the recorded cwd —
+  // discovery must match on the in-file cwd, not the folder name.
+  const claudeProjects = path.join(os.homedir(), '.claude', 'projects');
+  const testDir = path.join(claudeProjects, dirName);
+
+  fs.mkdirSync(testDir, { recursive: true });
+
+  const filePath = path.join(testDir, fileName);
+  const body =
+    lines.map((l) => JSON.stringify({ cwd, ...l })).join('\n') + '\n';
+
+  fs.writeFileSync(filePath, body);
+
+  return { filePath, testDir };
+}
+
+function runParserCwd(cwd, count) {
+  const args = [SCRIPT_PATH, '--cwd', cwd];
+
+  if (count !== undefined) {
+    args.push(String(count));
+  }
+
+  return execFileSync('python3', args, { encoding: 'utf8', timeout: 5000 });
+}
+
+test('parse-transcript --cwd matches the recorded working directory (handles dots/spaces)', () => {
+  // A cwd a naive `pwd | sed s,/,-,g` could never reconstruct correctly.
+  const cwd = '/home/tester/my.project dir.unique-aaa';
+  const { testDir } = createTranscriptWithCwd(
+    'cc-cwd-test-dotted',
+    'sess.jsonl',
+    cwd,
+    [
+      {
+        type: 'user',
+        timestamp: '2026-04-23T18:00:00Z',
+        message: { content: [{ type: 'text', text: 'dotted hello' }] }
+      }
+    ]
+  );
+
+  const output = runParserCwd(cwd);
+
+  assert.match(output, /dotted hello/);
+
+  fs.rmSync(testDir, { recursive: true, force: true });
+});
+
+test('parse-transcript --cwd reports no transcript when nothing matches', () => {
+  assert.throws(
+    () => runParserCwd('/nonexistent/path/unique-zzz-no-match'),
+    /No transcript found/
+  );
+});
+
+test('parse-transcript --cwd picks the most recent matching transcript', () => {
+  const cwd = '/home/tester/multi.unique-bbb';
+
+  const older = createTranscriptWithCwd('cc-cwd-test-multi', 'old.jsonl', cwd, [
+    {
+      type: 'user',
+      timestamp: '2026-04-23T18:00:00Z',
+      message: { content: [{ type: 'text', text: 'old transcript msg' }] }
+    }
+  ]);
+  const newer = createTranscriptWithCwd('cc-cwd-test-multi', 'new.jsonl', cwd, [
+    {
+      type: 'user',
+      timestamp: '2026-04-23T19:00:00Z',
+      message: { content: [{ type: 'text', text: 'new transcript msg' }] }
+    }
+  ]);
+
+  const now = Date.now() / 1000;
+  fs.utimesSync(older.filePath, now - 120, now - 120);
+  fs.utimesSync(newer.filePath, now + 120, now + 120);
+
+  const output = runParserCwd(cwd);
+
+  assert.match(output, /new transcript msg/);
+  assert.ok(
+    !output.includes('old transcript msg'),
+    'should select the newest matching transcript only'
+  );
+
+  fs.rmSync(newer.testDir, { recursive: true, force: true });
+});

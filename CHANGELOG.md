@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **`/timestamps` failed to find the transcript for project paths containing `.`, spaces, or other rewritten characters.** The slash command reconstructed the `~/.claude/projects/<dir>` name with `pwd | sed 's|/|-|g'`, which only rewrites `/` — so it mismatched Claude Code's actual folder name whenever the working-directory path held a character Claude Code also rewrites (dots, spaces, …), reporting "No transcript found." `parse-transcript.py` now resolves the transcript by matching the working directory recorded *inside* each transcript via a new `--cwd` argument (the robust approach from the `s-a-s-k-i-a/claude-code-timestamps` upstream), and `/timestamps` passes `--cwd` instead of guessing the folder name. The explicit-path CLI form is unchanged.
+
 ## [0.5.3] - 2026-06-18
 
 ### Fixed

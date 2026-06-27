@@ -70,3 +70,5 @@ The version string lives in three files and **must** stay in sync (enforced by `
 ## Marketplace integration notes
 
 This repo is a meta-plugin merging three upstreams: `clankercode/claude-inject-idle-time` (passive block + MCP server + statusline), the retrospective `/timestamps` work from `s-a-s-k-i-a/claude-code-timestamps` (MIT), and the visible per-message `[HH:MM:SS]` from `zoharbabin/claude-code-message-timestamps` (MIT). MIT-derived components are credited in `THIRD-PARTY-LICENSES.md`. The plugin is published from `pleasedodisturb/chronoclaude` (this repo): install via `/plugin marketplace add pleasedodisturb/chronoclaude` then `/plugin install chronoclaude@chronoclaude`. It was formerly distributed as `idle-timing` under `clankercode/claude-inject-idle-time` (now one of the upstreams it merges). GSD integration proposal: `docs/proposals/gsd-integration.md`.
+
+When reviewing the three upstreams for changes to pull in, record the outcome (adopted / already have / not applicable / deferred) in `docs/upstream-review.md` — it's the running sync log and the starting point for the next review.
