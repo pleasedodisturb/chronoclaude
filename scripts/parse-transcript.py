@@ -23,6 +23,65 @@ def validate_transcript_path(path):
     return resolved
 
 
+def transcript_cwd(path):
+    """Return the working directory recorded inside a transcript, or None.
+
+    Claude Code stamps the originating `cwd` onto (nearly) every transcript
+    entry. We return the first one we find. Matching this recorded directory is
+    robust against the path rewriting Claude Code applies when deriving the
+    ~/.claude/projects/<dir> name (which mangles dots, spaces, and other
+    characters) — reconstructing that name by hand is not.
+    """
+    try:
+        with open(path, encoding="utf-8") as f:
+            for line in f:
+                if '"cwd"' not in line:
+                    continue
+                try:
+                    entry = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                cwd = entry.get("cwd")
+                if isinstance(cwd, str) and cwd:
+                    return cwd
+    except OSError:
+        return None
+    return None
+
+
+def find_transcript_for_cwd(target_cwd):
+    """Find the most recent transcript whose recorded cwd matches target_cwd.
+
+    Approach adapted from s-a-s-k-i-a/claude-code-timestamps: match the working
+    directory stored *inside* the transcript instead of guessing the project
+    folder name from the path.
+    """
+    projects_dir = os.path.realpath(os.path.expanduser("~/.claude/projects"))
+    if not os.path.isdir(projects_dir):
+        return None
+
+    target = os.path.normpath(os.path.expanduser(target_cwd))
+
+    candidates = []
+    for root, _dirs, files in os.walk(projects_dir):
+        for name in files:
+            if not name.endswith(".jsonl"):
+                continue
+            file_path = os.path.join(root, name)
+            try:
+                mtime = os.path.getmtime(file_path)
+            except OSError:
+                continue
+            candidates.append((mtime, file_path))
+
+    for _mtime, file_path in sorted(candidates, reverse=True):
+        recorded = transcript_cwd(file_path)
+        if recorded and os.path.normpath(recorded) == target:
+            return file_path
+
+    return None
+
+
 def extract_preview(entry):
     """Extract a short text preview from a message entry."""
     msg = entry.get("message", {})
@@ -86,15 +145,48 @@ def parse_messages(transcript_path):
             )
 
 
+def parse_count(value, default=20):
+    """Return a positive integer count, or the default for anything else."""
+    if value is not None and value.isdigit() and int(value) > 0:
+        return int(value)
+    return default
+
+
 def main():
-    if len(sys.argv) < 2:
-        sys.exit("Usage: parse-transcript.py <transcript_path> [count]")
+    args = sys.argv[1:]
+    cwd = None
+    positional = []
 
-    transcript_path = validate_transcript_path(sys.argv[1])
+    i = 0
+    while i < len(args):
+        arg = args[i]
+        if arg == "--cwd":
+            i += 1
+            if i >= len(args):
+                sys.exit("Error: --cwd requires a directory argument")
+            cwd = args[i]
+        elif arg.startswith("--cwd="):
+            cwd = arg[len("--cwd="):]
+        else:
+            positional.append(arg)
+        i += 1
 
-    count = 20
-    if len(sys.argv) >= 3 and sys.argv[2].isdigit() and int(sys.argv[2]) > 0:
-        count = int(sys.argv[2])
+    if cwd is not None:
+        count = parse_count(positional[0] if positional else None)
+        transcript_path = find_transcript_for_cwd(cwd)
+        if not transcript_path:
+            sys.exit(
+                "No transcript found for this project directory. This command "
+                "must be run from a directory with an active Claude Code session."
+            )
+        transcript_path = validate_transcript_path(transcript_path)
+    else:
+        if not positional:
+            sys.exit(
+                "Usage: parse-transcript.py (<transcript_path> | --cwd <dir>) [count]"
+            )
+        transcript_path = validate_transcript_path(positional[0])
+        count = parse_count(positional[1] if len(positional) >= 2 else None)
 
     messages = list(parse_messages(transcript_path))
     tail = messages[-count:]
