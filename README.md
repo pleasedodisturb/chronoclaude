@@ -137,6 +137,10 @@ bash scripts/timeline.sh        # last 20 messages
 bash scripts/timeline.sh 50     # last 50
 ```
 
+![The zero-token /timestamps timeline: bash scripts/timeline.sh prints a wall-clock list of You/Claude messages with no model turn](docs/demo.gif)
+
+<sub>A real `scripts/timeline.sh` run on a sample session (reproduce it with `docs/demo/make-demo-transcript.sh`).</sub>
+
 Run it from the project directory whose session you want to inspect. It finds the right transcript by matching the working directory recorded inside Claude Code's transcript files, so it works from any project path — including ones containing dots or spaces.
 
 (The zero-token shell-wrapper idea comes from [s-a-s-k-i-a/claude-code-timestamps](https://github.com/s-a-s-k-i-a/claude-code-timestamps); see [`THIRD-PARTY-LICENSES.md`](./THIRD-PARTY-LICENSES.md).)
