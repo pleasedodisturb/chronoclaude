@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.4] - 2026-07-18
+
 ### Added
 - **Zero-token `/timestamps` via `scripts/timeline.sh`.** A shell wrapper that runs `parse-transcript.py` directly from your shell — no model turn, no tokens — and prints the session timeline (`bash scripts/timeline.sh [count]`). It locates the transcript with the same in-file `cwd` matching as `/timestamps`, so it works from any project path. Adapted from the `timeline.sh` in the `s-a-s-k-i-a/claude-code-timestamps` upstream (MIT); see `THIRD-PARTY-LICENSES.md`.
 
