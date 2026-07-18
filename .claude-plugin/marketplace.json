@@ -5,14 +5,13 @@
     "url": "https://github.com/pleasedodisturb"
   },
   "metadata": {
-    "name": "ChronoClaude",
     "description": "Time awareness for Claude Code — visible timestamps, hidden timing context, an MCP time server, and a session timeline."
   },
   "plugins": [
     {
       "name": "chronoclaude",
       "source": "./",
-      "version": "0.5.3",
+      "version": "0.5.4",
       "description": "Time awareness for Claude Code: visible per-message timestamps, hidden timing context, idle notes, an MCP time server, and a /timestamps timeline — every surface toggleable.",
       "homepage": "https://github.com/pleasedodisturb/chronoclaude",
       "repository": "https://github.com/pleasedodisturb/chronoclaude",
